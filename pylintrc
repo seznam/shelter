@@ -1,0 +1,3 @@
+[BASIC]
+good-names=i,j,k,ex,Run,_,logger
+extension-pkg-whitelist=setproctitle

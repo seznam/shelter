@@ -1,0 +1,2 @@
+python3-shelter: unusual-interpreter usr/lib/python3/dist-packages/shelter/commands/startproject_skel/manage.py.template #!$python
+python3-shelter: unusual-interpreter usr/lib/python3/dist-packages/shelter/commands/startproject_skel/setup.py.template #!$python

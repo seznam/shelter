@@ -1,0 +1,48 @@
+Source: python-shelter
+Section: python
+Priority: optional
+Maintainer: Advert <advert-vyvoj@firma.seznam.cz>
+Uploaders: Jan Seifert <jan.seifert@firma.seznam.cz>
+Build-Depends: debhelper (>= 9.0),
+               dh-python,
+               python-all,
+               python3-all,
+               python-setuptools,
+               python3-setuptools,
+               python-pytest,
+               python3-pytest,
+               python-mock,
+               python3-mock,
+               python-tornado (>= 4.2), python-tornado (<< 4.3),
+               python3-tornado (>= 4.2), python3-tornado (<< 4.3),
+               python-six,
+               python3-six,
+               python-setproctitle,
+               python3-setproctitle
+Standards-Version: 3.9.6
+X-Python-Version: 2.7
+X-Python3-Version: 3.4, 3.5
+
+Package: python-shelter
+Architecture: any
+Depends: ${python:Depends},
+         ${misc:Depends},
+         python-tornado (>= 4.2), python-tornado (<< 4.3),
+         python-six,
+         python-setproctitle
+Description: Simple Python's Tornado wrapper
+ Provides helpers for creating a new project, writing management commands,
+ service processes, ...
+
+Package: python3-shelter
+Architecture: any
+Depends: ${python3:Depends},
+         ${misc:Depends},
+         python3-tornado (>= 4.2), python3-tornado (<< 4.3),
+         python3-six,
+         python3-setproctitle
+Description: Simple Python's Tornado wrapper
+ Provides helpers for creating a new project, writing management commands,
+ service processes, ...
+ .
+ This package contains the Python 3 version of the library.

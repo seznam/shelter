@@ -1,0 +1,47 @@
+# $package application settings
+
+# Name of the application, this name will be shown in the process list.
+# NAME = '$package'
+
+# Function, which will be run during initialization of the application.
+# INIT_HANDLER = '$package.app.init_handler'
+
+# Function, which will be run on SIGUSR1. Function will be called in the
+# main process and in the all workers.
+# SIGUSR1_HANDLER = '$package.app.sigusr1_handler'
+
+# Function, which will be run on SIGUSR2.
+# SIGUSR2_HANDLER = '$package.app.sigusr2_handler'
+
+# Application configuration class name.
+# CONFIG_CLASS = '$package.config.Config'
+
+# Application context class name.
+# CONTEXT_CLASS = '$package.context.Context'
+
+# Application management commands
+MANAGEMENT_COMMANDS = (
+    # '$package.commands.DummyCommand',
+)
+
+# Application service processes. Each item is a tuple
+# ('path.to.Class', wait_unless_ready, timeout).
+SERVICE_PROCESSES = (
+    # ('$package.processes.DummyProcess', True, 5),
+)
+
+# HTTP server interfaces
+INTERFACES = {
+    'default': {
+        # Address/hostname (optional) and port where HTTP server listen to
+        # incomming requests.
+        'LISTEN': ':8000',
+
+        # Number of the server processes. Positive number, 0 means number
+        # of the CPU cores.
+        'PROCESSES': 0,
+
+        # URL path to HTTP handler routing.
+        'URLS': '$package.urls.urls_default',
+    },
+}

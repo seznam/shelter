@@ -1,0 +1,9 @@
+
+from tornado.web import URLSpec
+
+from $package.handlers import DummyHandler
+
+
+urls_default = (
+    URLSpec(r'/', DummyHandler),
+)
