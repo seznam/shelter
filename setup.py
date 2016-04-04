@@ -28,7 +28,7 @@ setup(
         'setproctitle<1.2',
     ],
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'pytest-cov', 'mock'],
+    tests_require=['pytest-cov', 'pytest', 'mock'],
     entry_points={
         'console_scripts': [
             'shelter-admin = shelter.main:main',
