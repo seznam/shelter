@@ -9,12 +9,11 @@ export PYBUILD_NAME=shelter
 %:
 	dh $@ --with python2,python3 --buildsystem=pybuild
 
-override_dh_auto_test:
-ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
-	PYTHONPATH=$(CURDIR)/shelter py.test -c pytest-debian.ini
-	PYTHONPATH=$(CURDIR)/shelter py.test-3 -c pytest-debian.ini
-endif
-
 override_dh_python3:
 	dh_python3
 	mv $(CURDIR)/debian/python3-shelter/usr/bin/shelter-admin $(CURDIR)/debian/python3-shelter/usr/bin/shelter-admin-3
+
+override_dh_clean:
+	dh_clean
+	rm -f $(CURDIR)/*.egg
+	rm -f $(CURDIR)/.coverage
