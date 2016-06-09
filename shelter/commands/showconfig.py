@@ -2,22 +2,20 @@
 Show effective configuration.
 """
 
-import six
+from pprint import pformat
 
 from shelter.core.commands import BaseCommand
 
 
 class ShowConfig(BaseCommand):
     """
-    Management command which shows effective configuration from
-    all configuration files.
+    Management command which shows effective configuration.
     """
 
     name = 'showconfig'
-    help = 'show effective configuration file'
+    help = 'show effective configuration'
 
     def command(self):
-        f_config = six.StringIO()
-        self.context.config.config_parser.write(f_config)
-        self.stdout.write(f_config.getvalue())
-        self.stdout.flush()
+        for k, value in self.context.config.get_config_items():
+            self.stdout.write("{}: {}\n".format(k, pformat(value)))
+            self.stdout.flush()

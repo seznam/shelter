@@ -1,5 +1,5 @@
 """
-Module :module:`shelter.core.Commands` provides an ancestor and
+Module :module:`shelter.core.commands` provides an ancestor and
 functionality for writing management commands.
 """
 
@@ -9,20 +9,12 @@ import sys
 
 import six
 
+from shelter.core.cmdlineparser import argument
 from shelter.core.processes import Worker
 from shelter.utils.imports import import_object
-from shelter.utils.logging import AddLoggerMeta, configure_logging
+from shelter.utils.logging import AddLoggerMeta
 
 __all__ = ['BaseCommand', 'argument']
-
-
-def argument(*args, **kwargs):
-    """
-    Return function's arguments how single command line argument should
-    be parsed. *args* a *kwargs* have the same meaning as a
-    :method:`argparse.ArgumentParser.add_argument` method.
-    """
-    return args, kwargs
 
 
 class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
@@ -38,6 +30,8 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
     ::
 
         # application/commands/hello.py
+
+        from shelter.core.commands import BaseCommand, argument
 
         class HelloCommand(BaseCommand):
 
@@ -101,7 +95,7 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
         config = self.context.config
 
         # Initialize logging
-        configure_logging(config)
+        self.context.config.configure_logging()
 
         # Call application init handler
         if config.init_handler:

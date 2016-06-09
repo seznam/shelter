@@ -3,16 +3,19 @@ Modul :module:`shelter.main` is an entry point from command line into
 **Shelter** application.
 """
 
-import argparse
 import importlib
 import itertools
 import os
 
 from gettext import gettext as _
 
+import six
+
 from shelter.commands import SHELTER_MANAGEMENT_COMMANDS
+from shelter.core.exceptions import ImproperlyConfiguredError
 from shelter.core.commands import BaseCommand
-from shelter.core.config import get_configparser, Config
+from shelter.core.cmdlineparser import ArgumentParser
+from shelter.core.config import Config
 from shelter.utils.imports import import_object
 
 
@@ -52,9 +55,8 @@ def get_management_commands(settings):
 
 def get_config_class(settings):
     """
-    Podle nastaveni **settings.CONFIG_CLASS** vrat tridu nesouci
-    konfiguraci aplikace, nebo vychozi :class:`shelter.core.config.Config`
-    pokud neni definovano.
+    According to **settings.CONFIG_CLASS** return either config class
+    defined by user or default :class:`shelter.core.config.Config`.
     """
     config_cls_name = getattr(settings, 'CONFIG_CLASS', '')
     if config_cls_name:
@@ -62,15 +64,6 @@ def get_config_class(settings):
     else:
         config_cls = Config
     return config_cls
-
-
-def parser_error(parser, message):
-    """
-    Print on **stderr** error message from command line parser and
-    exit process.
-    """
-    parser.print_help()
-    parser.exit(2, _('\n{:s}: error: {:s}\n').format(parser.prog, message))
 
 
 def main(args=None):
@@ -81,26 +74,18 @@ def main(args=None):
     # line is parsed in two stages - in the first stage is found setting
     # module of the application, in the second stage are found management
     # command's arguments.
-    parser = argparse.ArgumentParser(add_help=False)
+    parser = ArgumentParser(add_help=False)
     parser.add_argument(
         '-s', '--settings',
         dest='settings', action='store', type=str, default=None,
         help=_('application settings module')
-    )
-    parser.add_argument(
-        '-f', '--config-file',
-        dest='config', action='store', type=str, default=None,
-        help=_('configuration file')
     )
 
     # Get settings module
     try:
         settings = get_app_settings(parser, args)
     except ImportError as ex:
-        parser_error(
-            parser,
-            _("Invalid application settings module: %s") % ex
-        )
+        parser.error(_("Invalid application settings module: {}").format(ex))
 
     # Get management commands and add their arguments into command
     # line parser
@@ -108,43 +93,45 @@ def main(args=None):
     subparsers = parser.add_subparsers(
         dest='action', help=_('specify action')
     )
-    for command_cls in commands.values():
+    for command_cls in six.itervalues(commands):
         subparser = subparsers.add_parser(
             command_cls.name, help=command_cls.help)
         for command_args, kwargs in command_cls.arguments:
             subparser.add_argument(*command_args, **kwargs)
 
-    # Add help and parse command line
+    # Get config class and add its arguments into command line parser
+    if settings:
+        config_cls = get_config_class(settings)
+        if not issubclass(config_cls, Config):
+            raise TypeError(
+                "Config class must be subclass of the "
+                "shelter.core.config.Config")
+        for config_args, kwargs in config_cls.arguments:
+            parser.add_argument(*config_args, **kwargs)
+    else:
+        config_cls = Config
+
+    # Add help argument and parse command line
     parser.add_argument(
         '-h', '--help', action='help',
         help=_('show this help message and exit')
     )
     cmdline_args = parser.parse_args(args)
     if not cmdline_args.action:
-        parser_error(parser, _('No action'))
-
-    # Get configuration file parser
-    config_parser = get_configparser(cmdline_args.config)
+        parser.error(_('No action'))
 
     # Run management command
     command_cls = commands[cmdline_args.action]
-    if command_cls.settings_required:
-        if not settings:
-            parser_error(
-                parser, _(
-                    "Settings module is not defined. You must either set "
-                    "'SHELTER_SETTINGS_MODULE' environment variable or "
-                    "'-s/--settings' command line argument."
-                )
-            )
-        config_cls = get_config_class(settings)
-        if not issubclass(config_cls, Config):
-            raise TypeError(
-                "Config class must be subclass of the "
-                "shelter.core.config.Config")
-        config = config_cls(settings, config_parser, cmdline_args)
-    else:
-        config = Config(None, config_parser, cmdline_args)
+    if command_cls.settings_required and not settings:
+        parser.error(_(
+            "Settings module is not defined. You must either set "
+            "'SHELTER_SETTINGS_MODULE' environment variable or "
+            "'-s/--settings' command line argument."
+        ))
+    try:
+        config = config_cls(settings, cmdline_args)
+    except ImproperlyConfiguredError as ex:
+        parser.error(str(ex))
     command = command_cls(config)
     command()
 

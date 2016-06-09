@@ -1,6 +1,6 @@
 
-from shelter.core.config import Config
+from shelter.contrib.config.iniconfig import IniConfig
 
 
-class Config(Config):
+class Config(IniConfig):
     pass

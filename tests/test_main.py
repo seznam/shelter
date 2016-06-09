@@ -4,7 +4,8 @@ import pytest
 
 import shelter.main
 
-from shelter.core.commands import BaseCommand, argument
+from shelter.core.cmdlineparser import argument
+from shelter.core.commands import BaseCommand
 from shelter.commands.startproject import StartProject
 from shelter.core.config import Config
 

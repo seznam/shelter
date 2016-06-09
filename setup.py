@@ -24,7 +24,7 @@ class PyTest(TestCommand):
 
 setup(
     name="shelter",
-    version='1.0.0',
+    version='1.1.0',
     author='Seznam.cz, a.s.',
     author_email="advert-vyvoj@firma.seznam.cz",
     description=(

@@ -4,25 +4,7 @@ import logging
 import mock
 import pytest
 
-from shelter.core.commands import argument, BaseCommand
-
-
-def test_argument_empty():
-    assert argument() == ((), {})
-
-
-def test_argument_args():
-    assert argument('-h', '--help') == (('-h', '--help'), {})
-
-
-def test_argument_kwargs():
-    expected = ((), {'dest': 'help', 'type': str})
-    assert argument(dest='help', type=str) == expected
-
-
-def test_argument_both():
-    expected = (('-h', '--help'), {'dest': 'help', 'type': str})
-    assert argument('-h', '--help', dest='help', type=str) == expected
+from shelter.core.commands import BaseCommand
 
 
 def test_base_command():

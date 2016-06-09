@@ -1,3 +1,9 @@
+python-shelter (1.1.0~dev) unstable; urgency=medium
+
+  * shelter.core.config refactoring
+
+ -- Jan Seifert <jan.seifert@firma.seznam.cz>  Thu, 02 Jun 2016 10:20:55 +0200
+
 python-shelter (1.0.0) unstable; urgency=medium
 
   * First release 1.0.0

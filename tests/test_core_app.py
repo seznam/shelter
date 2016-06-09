@@ -1,10 +1,8 @@
 
-import argparse
 import importlib
 
-from six.moves import configparser
-
 from shelter.core.app import get_tornado_apps
+from shelter.core.cmdlineparser import ArgumentParser
 from shelter.core.config import Config
 from shelter.core.context import Context
 
@@ -12,8 +10,7 @@ from shelter.core.context import Context
 def test_get_tornado_apps():
     config = Config(
         importlib.import_module('tests.settings1'),
-        configparser.ConfigParser(),
-        argparse.ArgumentParser()
+        ArgumentParser()
     )
     context = config.context_class.from_config(config)
 

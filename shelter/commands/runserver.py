@@ -19,7 +19,6 @@ import tornado.process
 from shelter.core.app import get_tornado_apps
 from shelter.core.commands import BaseCommand
 from shelter.core.processes import Worker, start_workers
-from shelter.utils.logging import configure_logging
 
 
 def stop_child(http_server, parent_pid):
@@ -47,7 +46,7 @@ def tornado_worker(tornado_app, sockets, parent_pid):
         )
     )
 
-    configure_logging(tornado_app.settings['context'].config)
+    tornado_app.settings['context'].config.configure_logging()
 
     # Run HTTP server
     http_server = tornado.httpserver.HTTPServer(tornado_app)

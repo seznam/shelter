@@ -4,86 +4,26 @@ encapsulates configuration.
 """
 
 import collections
-import glob
-import logging
-import os.path
+import logging.config
 import sys
 
-import six.moves
+import six
 
+from shelter.core.cmdlineparser import argument
 from shelter.core.context import Context
 from shelter.utils.imports import import_object
+from shelter.utils.logging import BASE_LOGGING
 from shelter.utils.net import parse_host
 
-__all__ = ['Config']
-
-logger = logging.getLogger(__name__)
-
-CONFIGPARSER_EXC = (
-    six.moves.configparser.NoSectionError,
-    six.moves.configparser.NoOptionError,
-)
-
-
-def get_conf_d_files(path):
-    """
-    Return alphabetical ordered :class:`list` of the *.conf* files
-    placed in the path. *path* is a directory path.
-
-    ::
-
-        >>> get_conf_d_files('conf/conf.d/')
-        ['conf/conf.d/10-base.conf', 'conf/conf.d/99-dev.conf']
-    """
-    if not os.path.isdir(path):
-        raise ValueError("'%s' is not a directory" % path)
-    files_mask = os.path.join(path, "*.conf")
-    return [f for f in sorted(glob.glob(files_mask)) if os.path.isfile(f)]
-
-
-def get_conf_files(filename):
-    """
-    Return :class:`list` of the all configuration files. *filename* is a
-    path of the main configuration file.
-
-    ::
-
-        >>> get_conf_files('exampleapp.conf')
-        ['exampleapp.conf', 'exampleapp.conf.d/10-database.conf']
-    """
-    if not os.path.isfile(filename):
-        raise ValueError("'%s' is not a file" % filename)
-    conf_d_path = "%s.d" % filename
-    if not os.path.exists(conf_d_path):
-        return [filename]
-    else:
-        return [filename] + get_conf_d_files(conf_d_path)
-
-
-def get_configparser(filename=''):
-    """
-    Read main configuration file and all files from *conf.d* subdirectory
-    and return parsed configuration as a **configparser.RawConfigParser**
-    instance.
-    """
-    parser = six.moves.configparser.RawConfigParser()
-    filename = filename or os.environ.get('SHELTER_CONFIG_FILENAME', '')
-    if filename:
-        for conf_file in get_conf_files(filename):
-            logger.info("Found config '%s'", conf_file)
-            if not parser.read(conf_file):
-                logger.warning("Error while parsing config '%s'", conf_file)
-    return parser
+__all__ = ['Config', 'argument']
 
 
 class Config(object):
     """
-    Class which encapsulates all configurations. It joins options from
-    settings module, configuration file and command line arguments.
-    *settings* is a Python's module defined by **SHELTER_SETTINGS_MODULE**
-    environment variable or **-s/--settings** command line argument,
-    *config_parser* is a :class:`configparser.RawConfigParser` instance
-    (Py2)/:class:`ConfigParser.RawConfigParser` (Py3) and *args_parser*
+    Class which encapsulates configuration. It joins options from
+    settings module and command line arguments. *settings* is a Python's
+    module defined by either **SHELTER_SETTINGS_MODULE** environment
+    variable or **-s/--settings** command line argument and *args_parser*
     is a :class:`argparse.Namespace` instance.
     """
 
@@ -94,9 +34,13 @@ class Config(object):
     Container which encapsulates arguments of the interface.
     """
 
-    def __init__(self, settings, config_parser, args_parser):
+    arguments = ()
+    """
+    Command line arguments of the Config class.
+    """
+
+    def __init__(self, settings, args_parser):
         self._settings = settings
-        self._config_parser = config_parser
         self._args_parser = args_parser
         self._cached_values = {}
 
@@ -105,20 +49,37 @@ class Config(object):
             self.__class__.__module__, self.__class__.__name__, id(self)
         )
 
+    def configure_logging(self):
+        """
+        Configure Python's logging according to configuration *config*.
+        """
+        logging.config.dictConfig(self.logging or BASE_LOGGING)
+
+    def get_config_items(self):
+        """
+        Return current configuration as a :class:`tuple` with
+        option-value pairs.
+
+        ::
+            (('option1', value1), ('option2', value2))
+        """
+        return (
+            ('settings', self.settings),
+            ('context_class', self.context_class),
+            ('interfaces', self.interfaces),
+            ('logging', self.logging),
+            ('name', self.name),
+            ('init_handler', self.init_handler),
+            ('sigusr1_handler', self.sigusr1_handler),
+            ('sigusr2_handler', self.sigusr2_handler),
+        )
+
     @property
     def settings(self):
         """
         Settings module of the application.
         """
         return self._settings
-
-    @property
-    def config_parser(self):
-        """
-        Parsed configuration file as a **configparser.RawConfigParser**
-        instance.
-        """
-        return self._config_parser
 
     @property
     def args_parser(self):
@@ -150,30 +111,13 @@ class Config(object):
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
             for name, interface in six.iteritems(self.settings.INTERFACES):
-                interface_name = 'interface_%s' % name
-                # Hostname + port
-                try:
-                    host, port = parse_host(
-                        self.config_parser.get(interface_name, 'Listen'))
-                except CONFIGPARSER_EXC:
-                    host, port = parse_host(interface['LISTEN'])
-                # Processes
-                try:
-                    processes = self.config_parser.getint(
-                        interface_name, 'Processes')
-                except CONFIGPARSER_EXC:
-                    processes = int(interface.get('PROCESSES', 1))
-                # Urls
-                try:
-                    urls_obj_name = self.config_parser.get(
-                        interface_name, 'Urls')
-                except CONFIGPARSER_EXC:
-                    urls_obj_name = interface.get('URLS', '')
+                host, port = parse_host(interface['LISTEN'])
+                processes = int(interface.get('PROCESSES', 1))
+                urls_obj_name = interface.get('URLS', '')
                 if urls_obj_name:
                     urls = import_object(urls_obj_name)
                 else:
                     urls = ()
-
                 self._cached_values['interfaces'].append(
                     self.Interface(name, host, port, processes, urls)
                 )
@@ -185,13 +129,6 @@ class Config(object):
         *Python's logging* configuration or :const:`None`.
         """
         return getattr(self.settings, 'LOGGING', None)
-
-    @property
-    def logging_from_config_file(self):
-        """
-        Read *Python's logging* configuration from configuration file flag.
-        """
-        return getattr(self.settings, 'LOGGING_FROM_CONFIG_FILE', False)
 
     @property
     def name(self):

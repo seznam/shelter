@@ -3,14 +3,19 @@ Shelter
 
 Shelter is a *Python's Tornado* wrapper which provides classes and helpers
 for creation new application skeleton, writing management commands (like a
-*Django*), service processes and request handlers. *Python 2.7* and *Python
-3.4* or higher are supported.
+*Django*), service processes and request handlers. , It was tested with
+*Python 2.7* and *Python 3.4* or higher and *Tornado 4.2*.
 
 Instalation
 -----------
 
     cd shelter/
     python setup.py install
+
+or
+
+    cd shelter/
+    python setup.py develop
     python setup.py test
 
 After instalation **shelter-admin** command is available. For help type:
@@ -25,6 +30,8 @@ priority than environment variable.
 
     shelter-admin -s myapp.settings -h
 
+or
+
     SHELTER_SETTINGS_MODULE=myapp.settings shelter-admin -h
 
 Ussage
@@ -32,36 +39,30 @@ Ussage
 
     shelter-admin startproject myproject
 
-Skeleton of the new application will be created in the current working
-directory. Project name has the same rules as Python's module name. Entry
-point into new application is a script **manage.py**.
+Skeleton of the new application will be created in current working directory.
+Project name has the same rules as Python's module name. Entry point into new
+application is a script **manage.py**.
 
     cd myproject/
     ./manage.py -h
     ./manage.py devserver
 
-`settings.py` is included in the new skeleton. It is rich commented -
-definition of the interfaces, management commands, service processes,
-...
+`settings.py` is included in the new skeleton. See comments in file how to
+define interfaces, management commands, service processes, ...
 
 Management commands which provides Shelter library:
 
 * **devserver** runs development HTTP server, which autoreloads application
   when source files are changes. Server is run only in one process, service
   processes are run in the threads.
-* **runserver** runs production HTTP, multi-process server. Number of
+* **runserver** runs production HTTP, multi-process server. Number of the
   processes are detected according to `INTERFACES` setting in the `settings`
   module. Service processes are run in separated processes. Parent process
   checks child processes and when child process crashes, it is run again.
   Maximum amount of the crashes are 100, then application will exit.
-* **shell** runs interactive Python's shell. First it try to run *IPython*,
-  then Python shell.
-* **showconfig** shows effective configuration. First, main configuration
-  file defined by `-f/--config-file` command line argument is read. Then
-  all configuration files from `file.conf.d` subdirectory are read in
-  alphabetical order. E.g. if `-f conf/myapp.conf` is handled, first is
-  read `conf/myapp.conf` file and then all `conf/myapp.conf.d/*.conf`
-  files. Value in later configuration file overrides previous defined value.
+* **shell** runs interactive Python's shell. First it tries to run *IPython*,
+  then standard Python shell.
+* **showconfig** shows effective configuration.
 * **startproject** will generate new apllication skeleton.
 
 Config class
@@ -69,30 +70,54 @@ Config class
 
 Library provides base configuration class `shelter.core.config.Config`
 which holds all configuration. Public attributes are **settings** which
-is `settings` module of the application, **config\_parser** which is
-instance of the `configparser.RawConfigParser` from *Python's standard
-library* and **args\_parser** which is instance of the
-`argparse.ArgumentParser` from *Python's standard library*.
+is `settings` module of the application and **args_parser** which is
+instance of the `argparse.ArgumentParser` from *Python's standard library*.
 
 You can override this class in the `settings` module:
 
-    CONFIG_CLASS = 'myapp.core.config.Config'
+    CONFIG_CLASS = 'myapp.core.config.AppConfig'
 
-Your own `Config` class can contain additional *properties* with application's
-settings, e.g. database connection arguments. Way how the value is found is
-only on you - either only in **settings**, **config\_parser** and
-**args\_parser** or in all of them (e.g. commann line has higher priority
-than configuration file).
+Your own `AppConfig` class can contain additional *properties* with
+application's settings, e.g. database connection arguments. Way how the value
+is found is only on you - either only in **settings** or **args_parser** or
+in both. You can define additional arguments of the command line.
 
-    class Config(shelter.core.config.Config):
+    from shelter.core.config import Config, argument
+
+    class AppConfig(Config):
+
+        arguments = (
+            argument(
+                '-k', '--secret-key',
+                dest='secret_key', action='store',
+                type=str, default='',
+                help='configuration file'
+            ),
+        )
 
         Database = collections.namedtuple('Database', ['host', 'db'])
+
+        def get_config_items(self):
+            # Override get_config_items() method if you want to add
+            # your options into showconfig management command.
+            base_items = super(AppConfig, self).get_config_items()
+            app_items = (
+                ('secret_key', self.secret_key),
+                ('database', self.database),
+            )
+            return base_items + app_items
+
+        @property
+        def secret_key(self):
+            return self.args_parser.secret_key or self.settings.SECRET_KEY
 
         @property
         def database(self):
             return self.Database(
-                self.config_parser.get('Database', 'Host'),
-                self.config_parser.get('Database', 'DbName'))
+                db=self.settings.DATABASE_NAME,
+                host=self.settings.DATABASE_HOST,
+                passwd=getattr(self.settings, DATABASE_PASSWORD, '')
+            )
 
 Context class
 -------------
@@ -101,11 +126,11 @@ In all handlers, management commands and service processes is available
 instance of the `shelter.core.context.Context` which holds data and
 classes instance for your appllication. Bundled class `Context` contains
 only one property **config** with `Config` instance (see previous
-paragraph).
+chapter).
 
-You can override it in the `settings` module: 
+You can define own class in `settings` module:
 
-    CONTEXT_CLASS = 'myapp.core.core.Context'
+    CONTEXT_CLASS = 'myapp.core.context.Context'
 
 Overrided `Context` can contain additional *properties*, e.g. database
 connection pool. 
@@ -198,7 +223,7 @@ method and/or `initialize()` method.
 
     from gettext import gettext as _
 
-    from shelter.core.commands import argument, BaseCommand
+    from shelter.core.commands import BaseCommand, argument
 
     class Export(BaseCommand)
 
@@ -231,16 +256,16 @@ method and/or `initialize()` method.
 * **arguments** are arguments of the command line parser. `argument()`
   function has the same meaning as `ArgumentParser.add_argument()`
   from *Python's standard library*.
-* **service\_processes\_start** If it is `True`, service processes will be
+* **service_processes_start** If it is `True`, service processes will be
   launched on background. Default is do not launch any service processes.
-  **It is not public API, do not use this attribute unless you are not
-  an expert**!
-* **service\_processes\_in\_thread** If it is `True`, launch service
+  **It is not public API, do not use this attribute unless you really know
+  what you are doing**!
+* **service_processes_in_thread** If it is `True`, launch service
   processes in threads, else as a separated processes. **It is not public
-  API, do not use this attribute unless you are not an expert**!
-* **settings\_required** If it is `True`, `settings` module will not be
-  required. **It is not public API, do not use this attribute unless you are
-  not an expert**!
+  API, do not use this attribute unless you really know what you are doing**!
+* **settings_required** If it is `True`, `settings` module will not be
+  required. **It is not public API, do not use this attribute unless you
+  really know what you are doing**!
 
 Management command has to be registered in the `settings` module.
 
@@ -252,7 +277,7 @@ Interfaces
 ----------
 
 *Tornado's HTTP server* can be run in multiple instances. Interface are
-defined in the `settings` module.
+defined in `settings` module.
 
     INTERFACES = {
         'default': {
@@ -285,7 +310,7 @@ It is the same as in *Python's Tornado* application.
         URLSpec(r'/about/', AboutHandler),
     )
 
-Tuple/list **urls\_default** is handled into relevant interface in the
+Tuple/list **urls_default** is handled into relevant interface in the
 `settings` module, see previous chapter.
 
 HTTP handler is a subclass of the `shelter.core.web.BaseRequestHandler`
@@ -313,8 +338,9 @@ attributes **logger**, **context** and **interface**.
 Logging
 -------
 
-Standard *Python's logging* is used. Logging can be set either in the
-`settings` module,:
+Standard *Python's logging* is used. `Config.configure_logging()` method
+is responsible for setting the logging. Default `Config` class reads logging's
+configuration from `settings` module:
 
     LOGGING = {
         'version': 1,
@@ -332,11 +358,39 @@ Standard *Python's logging* is used. Logging can be set either in the
         },
     }
 
-or in the configuration file. This must be forced in the `settings` module:
+Contrib
+-------
 
-    LOGGING_FROM_CONFIG_FILE = True
+### shelter.contrib.config.iniconfig.IniConfig
 
-And put logging configuration into configuration file:
+Descendant of the `shelter.core.config.Config`, provides **INI** files
+configuration. Adds additional public attribute **config_parser** which is
+instance of the `RawConfigParser` from *Python's standard library*.
+Interfaces and application's name can be overrided in configuration file,
+*Python's logging* must be defined.
+
+Configuration file is specified either by `SHELTER_CONFIG_FILENAME`
+environment variable or `-f/--config-file` command line argument. First,
+main configuration file is read. Then all configuration files from
+`file.conf.d` subdirectory are read in alphabetical order. E.g. if
+`-f conf/myapp.conf` is handled, first `conf/myapp.conf` file is read
+and then all `conf/myapp.conf.d/*.conf` files. Value in later
+configuration file overrides previous defined value.
+
+    [application]
+    name = MyApp
+
+    [interface_http]
+    Listen=:4444
+    Processes=8
+    Urls=tests.urls1.urls_http
+
+    [formatters]
+    keys=default
+
+    [formatter_default]
+    class=logging.Formatter
+    format=%(asctime)s %(name)s %(levelname)s: %(message)s
 
     [handlers]
     keys=console
@@ -350,8 +404,9 @@ And put logging configuration into configuration file:
     keys=root
 
     [logger_root]
-    handlers=console
     level=INFO
+    handlers=console
+
 
 License
 -------

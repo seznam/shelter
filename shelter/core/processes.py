@@ -17,7 +17,7 @@ import setproctitle
 import six
 
 from shelter.core.exceptions import ProcessError
-from shelter.utils.logging import AddLoggerMeta, configure_logging
+from shelter.utils.logging import AddLoggerMeta
 
 __all__ = ['BaseProcess']
 
@@ -244,7 +244,7 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
         if self.separate_process:
             setproctitle.setproctitle(self.name)
 
-            configure_logging(self.context.config)
+            self.context.config.configure_logging()
 
             # Register SIGINT handler which will exit service process
             def sigint_handler(dummy_signum, dummy_frame):

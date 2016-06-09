@@ -11,6 +11,14 @@ class ShelterError(Exception):
     pass
 
 
+class ImproperlyConfiguredError(ShelterError):
+    """
+    Configuration error.
+    """
+
+    pass
+
+
 class ProcessError(ShelterError):
     """
     Worker/service process error.
