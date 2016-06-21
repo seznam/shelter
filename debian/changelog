@@ -1,3 +1,9 @@
+python-shelter (1.0.0+1) unstable; urgency=medium
+
+  * Fixed Debian dependency
+
+ -- Jan Seifert <jan.seifert@firma.seznam.cz>  Tue, 21 Jun 2016 13:47:38 +0200
+
 python-shelter (1.0.0) unstable; urgency=medium
 
   * First release 1.0.0

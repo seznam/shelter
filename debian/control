@@ -30,6 +30,7 @@ Architecture: any
 Depends: ${python:Depends},
          ${misc:Depends},
          python-tornado (>= 4.2), python-tornado (<< 4.3),
+         python-pkg-resources,
          python-six,
          python-setproctitle
 Description: Simple Python's Tornado wrapper
@@ -41,6 +42,7 @@ Architecture: any
 Depends: ${python3:Depends},
          ${misc:Depends},
          python3-tornado (>= 4.2), python3-tornado (<< 4.3),
+         python3-pkg-resources,
          python3-six,
          python3-setproctitle
 Description: Simple Python's Tornado wrapper
