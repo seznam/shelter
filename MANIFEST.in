@@ -1,1 +1,3 @@
-recursive-include shelter *
+recursive-include exampleapp *
+recursive-include shelter/commands/startproject_skel *
+recursive-include tests *
