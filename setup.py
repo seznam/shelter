@@ -59,9 +59,9 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'tornado>=4.2,<4.3',
+        'tornado>=4.2',
         'six',
-        'setproctitle<1.2',
+        'setproctitle>=1.1',
     ],
     tests_require=[
         'pytest-cov',
