@@ -9,19 +9,25 @@ for creation new application skeleton, writing management commands (like a
 Instalation
 -----------
 
+::
+
     cd shelter/
     python setup.py install
     python setup.py test
 
 After instalation **shelter-admin** command is available. For help type:
 
+::
+
     shelter-admin -h
 
-The most important argument is `-s/--settings`, which joins Shelter library
+The most important argument is ``-s/--settings``, which joins Shelter library
 and your application. Format is Python's module path, eg. `myapp.settings`.
-Second option how to handle `settings` module is `SHELTER_SETTINGS_MODULE`
+Second option how to handle `settings` module is ``SHELTER_SETTINGS_MODULE``
 environment variable. If both are handled, command line argument has higher
 priority than environment variable.
+
+::
 
     shelter-admin -s myapp.settings -h
 
@@ -30,17 +36,21 @@ priority than environment variable.
 Ussage
 ------
 
+::
+
     shelter-admin startproject myproject
 
 Skeleton of the new application will be created in the current working
 directory. Project name has the same rules as Python's module name. Entry
 point into new application is a script **manage.py**.
 
+::
+
     cd myproject/
     ./manage.py -h
     ./manage.py devserver
 
-`settings.py` is included in the new skeleton. It is rich commented -
+``settings.py`` is included in the new skeleton. It is rich commented -
 definition of the interfaces, management commands, service processes,
 ...
 
@@ -50,39 +60,42 @@ Management commands which provides Shelter library:
   when source files are changes. Server is run only in one process, service
   processes are run in the threads.
 * **runserver** runs production HTTP, multi-process server. Number of
-  processes are detected according to `INTERFACES` setting in the `settings`
-  module. Service processes are run in separated processes. Parent process
-  checks child processes and when child process crashes, it is run again.
-  Maximum amount of the crashes are 100, then application will exit.
+  processes are detected according to ``INTERFACES`` setting in the
+  ``settings`` module. Service processes are run in separated processes.
+  Parent process checks child processes and when child process crashes,
+  it is run again. Maximum amount of the crashes are 100, then application
+  will exit.
 * **shell** runs interactive Python's shell. First it try to run *IPython*,
   then Python shell.
 * **showconfig** shows effective configuration. First, main configuration
-  file defined by `-f/--config-file` command line argument is read. Then
-  all configuration files from `file.conf.d` subdirectory are read in
-  alphabetical order. E.g. if `-f conf/myapp.conf` is handled, first is
-  read `conf/myapp.conf` file and then all `conf/myapp.conf.d/*.conf`
+  file defined by ``-f/--config-file`` command line argument is read. Then
+  all configuration files from ``file.conf.d`` subdirectory are read in
+  alphabetical order. E.g. if ``-f conf/myapp.conf`` is handled, first is
+  read ``conf/myapp.conf`` file and then all ``conf/myapp.conf.d/*.conf``
   files. Value in later configuration file overrides previous defined value.
 * **startproject** will generate new apllication skeleton.
 
 Config class
 ------------
 
-Library provides base configuration class `shelter.core.config.Config`
+Library provides base configuration class ``shelter.core.config.Config``
 which holds all configuration. Public attributes are **settings** which
-is `settings` module of the application, **config\_parser** which is
-instance of the `configparser.RawConfigParser` from *Python's standard
-library* and **args\_parser** which is instance of the
-`argparse.ArgumentParser` from *Python's standard library*.
+is ``settings`` module of the application, **config_parser** which is
+instance of the ``configparser.RawConfigParser`` from *Python's standard
+library* and **args_parser** which is instance of the
+``argparse.ArgumentParser`` from *Python's standard library*.
 
-You can override this class in the `settings` module:
+You can override this class in the `settings` module::
 
     CONFIG_CLASS = 'myapp.core.config.Config'
 
-Your own `Config` class can contain additional *properties* with application's
-settings, e.g. database connection arguments. Way how the value is found is
-only on you - either only in **settings**, **config\_parser** and
-**args\_parser** or in all of them (e.g. commann line has higher priority
+Your own ``Config`` class can contain additional *properties* with
+application's settings, e.g. database connection arguments. Way how the
+value is found is only on you - either only in **settings**, **config_parser**
+and **args_parser** or in all of them (e.g. commann line has higher priority
 than configuration file).
+
+::
 
     class Config(shelter.core.config.Config):
 
@@ -98,25 +111,27 @@ Context class
 -------------
 
 In all handlers, management commands and service processes is available
-instance of the `shelter.core.context.Context` which holds data and
-classes instance for your appllication. Bundled class `Context` contains
-only one property **config** with `Config` instance (see previous
+instance of the ``shelter.core.context.Context`` which holds data and
+classes instance for your appllication. Bundled class ``Context`` contains
+only one property **config** with ``Config`` instance (see previous
 paragraph).
 
-You can override it in the `settings` module: 
+You can override it in the `settings` module::
 
     CONTEXT_CLASS = 'myapp.core.core.Context'
 
-Overrided `Context` can contain additional *properties*, e.g. database
+Overrided ``Context`` can contain additional *properties*, e.g. database
 connection pool. 
 
 **It is necesary to initialize shared sources (sockets, open files, ...)
 lazy!** The reason is that subprocesses (Tornado HTTP workers, service
-processes) have to get uninitialized `Context`, because forked resources
+processes) have to get uninitialized ``Context``, because forked resources
 can cause a lot of nights without dreams... **Also it is necessary to known
-that `Context` is shared among coroutines!** So you are responsible for
+that ``Context`` is shared among coroutines!** So you are responsible for
 locking shared resources (be carreful, it is blocking operation) or use
 another mechanism, e.g. database connection pool.
+
+::
 
     class Context(shelter.core.context.Context):
 
@@ -138,13 +153,16 @@ Hooks
 You can define several hooks in the `settings` module - when application
 is launched and on **SIGUSR1** and **SIGUSR2** signals.
 
+::
 
     INIT_HANDLER = 'myapp.core.app.init_handler'
     SIGUSR1_HANDLER = 'myapp.core.app.sigusr1_handler'
     SIGUSR2_HANDLER = 'myapp.core.app.sigusr2_handler'
 
 Handler is common *Python's* function which takes only one argument
-*context* with `Context` instance (see previous chapter).
+*context* with ``Context`` instance (see previous chapter).
+
+::
 
     def init_handler(context):
         do_something(context.config)
@@ -162,9 +180,11 @@ Service processes
 
 Service process are tasks which are repeatedly launched in adjusted interval,
 e.g. warms cache data before they expire. Library provides base class
-`shelter.core.process.BaseProcess`. For new service process
-you must inherit `BaseProcess`, adjust `interval` attribute and override
-`loop()` method.
+``shelter.core.process.BaseProcess``. For new service process
+you must inherit ``BaseProcess``, adjust ``interval`` attribute and override
+``loop()`` method.
+
+::
 
     from shelter.core.processes import BaseProcess
 
@@ -177,10 +197,12 @@ you must inherit `BaseProcess`, adjust `interval` attribute and override
             with self.context.db.get_connection_from_pool() as db:
                 self.context.set('key', db.get_data(), timeout=60)
 
-* **interval** is a time in seconds. After this time `loop()` method is
+* **interval** is a time in seconds. After this time ``loop()`` method is
   repeatedly called.
 
 Service process has to be registered in the `settings` module.
+
+::
 
     SERVICE_PROCESSES = (
         'myapp.processes.WarmCache',
@@ -189,10 +211,12 @@ Service process has to be registered in the `settings` module.
 Management commands
 -------------------
 
-Class `shelter.core.commands.BaseCommand` is an ancestor for user
+Class ``shelter.core.commands.BaseCommand`` is an ancestor for user
 defined managemend commands, e.g. export/import database data. For new
-management command you must inherit `BaseCommand` and override `command()`
-method and/or `initialize()` method.
+management command you must inherit ``BaseCommand`` and override ``command()``
+method and/or ``initialize()`` method.
+
+::
 
     import sys
 
@@ -225,24 +249,26 @@ method and/or `initialize()` method.
             self.output_file.flush()
 
 * **name** is a name of the management command. This name you type into
-  command line, e.g. `./manage.py export`.
+  command line, e.g. ``./manage.py export``.
 * **help** is a short description of the management command. This help is
-  printed onto console when you type `./manage.py command -h`.
-* **arguments** are arguments of the command line parser. `argument()`
-  function has the same meaning as `ArgumentParser.add_argument()`
+  printed onto console when you type ``./manage.py command -h``.
+* **arguments** are arguments of the command line parser. ``argument()``
+  function has the same meaning as ``ArgumentParser.add_argument()``
   from *Python's standard library*.
-* **service\_processes\_start** If it is `True`, service processes will be
+* **service_processes_start** If it is ``True``, service processes will be
   launched on background. Default is do not launch any service processes.
   **It is not public API, do not use this attribute unless you are not
   an expert**!
-* **service\_processes\_in\_thread** If it is `True`, launch service
+* **service_processes_in_thread** If it is ``True``, launch service
   processes in threads, else as a separated processes. **It is not public
   API, do not use this attribute unless you are not an expert**!
-* **settings\_required** If it is `True`, `settings` module will not be
+* **settings_required** If it is ``True``, ``settings`` module will not be
   required. **It is not public API, do not use this attribute unless you are
   not an expert**!
 
-Management command has to be registered in the `settings` module.
+Management command has to be registered in the ``settings`` module.
+
+::
 
     MANAGEMENT_COMMANDS = (
         'myapp.commands.Export',
@@ -252,7 +278,9 @@ Interfaces
 ----------
 
 *Tornado's HTTP server* can be run in multiple instances. Interface are
-defined in the `settings` module.
+defined in the ``settings`` module.
+
+::
 
     INTERFACES = {
         'default': {
@@ -276,6 +304,8 @@ URL path to HTTP handler routing
 
 It is the same as in *Python's Tornado* application.
 
+::
+
     from tornado.web import URLSpec
 
     from myapp.handlers import HomepageHandler, AboutHandler
@@ -285,20 +315,22 @@ It is the same as in *Python's Tornado* application.
         URLSpec(r'/about/', AboutHandler),
     )
 
-Tuple/list **urls\_default** is handled into relevant interface in the
-`settings` module, see previous chapter.
+Tuple/list **urls_default** is handled into relevant interface in the
+``settings`` module, see previous chapter.
 
-HTTP handler is a subclass of the `shelter.core.web.BaseRequestHandler`
-which enhances `tornado.web.RequestHandler`. Provides additional instance
+HTTP handler is a subclass of the ``shelter.core.web.BaseRequestHandler``
+which enhances ``tornado.web.RequestHandler``. Provides additional instance
 attributes **logger**, **context** and **interface**.
 
-* **logger** is an instance of the `logging.Logger` from *Python's standard
+* **logger** is an instance of the ``logging.Logger`` from *Python's standard
   library*. Logger name is derived from handlers's name, e.g
-  `myapp.handlers.HomepageHandler`.
-* **context** is an instance of the `Context`, see *Context* paragraph.
+  ``myapp.handlers.HomepageHandler``.
+* **context** is an instance of the ``Context``, see *Context* paragraph.
 * **interface** is a namedtuple with informations about current interface.
   Named attributes are **name**, **host**, **port**, **processes** and
   **urls**.
+
+::
 
     from shelter.core.web import BaseRequestHandler
 
@@ -314,7 +346,7 @@ Logging
 -------
 
 Standard *Python's logging* is used. Logging can be set either in the
-`settings` module,:
+``settings`` module,::
 
     LOGGING = {
         'version': 1,
@@ -332,11 +364,11 @@ Standard *Python's logging* is used. Logging can be set either in the
         },
     }
 
-or in the configuration file. This must be forced in the `settings` module:
+or in the configuration file. This must be forced in the ``settings`` module::
 
     LOGGING_FROM_CONFIG_FILE = True
 
-And put logging configuration into configuration file:
+And put logging configuration into configuration file::
 
     [handlers]
     keys=console
