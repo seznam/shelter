@@ -2,7 +2,19 @@ python-shelter (1.1.0~dev) unstable; urgency=medium
 
   * shelter.core.config refactoring
 
- -- Jan Seifert <jan.seifert@firma.seznam.cz>  Thu, 02 Jun 2016 10:20:55 +0200
+ -- Jan Seifert <jan.seifert@firma.seznam.cz>  Thu, 06 Jul 2016 21:14:27 +0200
+
+python-shelter (1.0.0+2) unstable; urgency=medium
+
+  * Update Debian dependency
+
+ -- Jan Seifert <jan.seifert@firma.seznam.cz>  Wed, 06 Jul 2016 20:50:45 +0200
+
+python-shelter (1.0.0+1) unstable; urgency=medium
+
+  * Fixed Debian dependency
+
+ -- Jan Seifert <jan.seifert@firma.seznam.cz>  Tue, 21 Jun 2016 13:47:38 +0200
 
 python-shelter (1.0.0) unstable; urgency=medium
 
