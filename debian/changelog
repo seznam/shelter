@@ -1,6 +1,7 @@
 python-shelter (1.1.0~dev) unstable; urgency=medium
 
   * shelter.core.config refactoring
+  * Added initialize() into Config and Context classes
 
  -- Jan Seifert <jan.seifert@firma.seznam.cz>  Thu, 06 Jul 2016 21:14:27 +0200
 

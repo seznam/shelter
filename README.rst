@@ -91,6 +91,8 @@ in both. You can define additional arguments of the command line.
 
 ::
 
+    import os
+
     from shelter.core.config import Config, argument
 
     class AppConfig(Config):
@@ -105,6 +107,9 @@ in both. You can define additional arguments of the command line.
         )
 
         Database = collections.namedtuple('Database', ['host', 'db'])
+
+        def initialize(self):
+            self.secret_key = os.urandom(64)
 
         def get_config_items(self):
             # Override get_config_items() method if you want to add
@@ -156,8 +161,7 @@ another mechanism, e.g. database connection pool.
 
     class Context(shelter.core.context.Context):
 
-        def __init__(self, config):
-            super(Context, self).__init__(config)
+        def initialize(self):
             self._database = None
 
         @property

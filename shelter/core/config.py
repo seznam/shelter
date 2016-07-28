@@ -43,11 +43,19 @@ class Config(object):
         self._settings = settings
         self._args_parser = args_parser
         self._cached_values = {}
+        self.initialize()
 
     def __repr__(self):
         return "<{}.{}: {:#x}>".format(
             self.__class__.__module__, self.__class__.__name__, id(self)
         )
+
+    def initialize(self):
+        """
+        Initialize instance attributes. You can override this method in
+        the subclasses.
+        """
+        pass
 
     def configure_logging(self):
         """

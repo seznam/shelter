@@ -20,6 +20,7 @@ class Context(object):
 
     def __init__(self, config):
         self._config = config
+        self.initialize()
 
     @classmethod
     def from_config(cls, config):
@@ -28,6 +29,13 @@ class Context(object):
         return new instance of the **Context**.
         """
         return cls(config)
+
+    def initialize(self):
+        """
+        Initialize instance attributes. You can override this method in
+        the subclasses.
+        """
+        pass
 
     @property
     def config(self):
