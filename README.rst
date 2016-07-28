@@ -28,13 +28,13 @@ priority than environment variable.
 
 ::
 
-    shelter-admin -s myapp.settings -h
+    shelter-admin -s myapp.settings
 
 or
 
 ::
 
-    SHELTER_SETTINGS_MODULE=myapp.settings shelter-admin -h
+    SHELTER_SETTINGS_MODULE=myapp.settings shelter-admin
 
 Ussage
 ------
