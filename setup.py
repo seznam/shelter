@@ -42,7 +42,7 @@ setup(
     description=description,
     long_description=long_description,
     license="BSD",
-    url='https://pypi.python.org/pypi/shelter/',
+    url='https://github.com/seznam/shelter',
     classifiers=[
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.4',

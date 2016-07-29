@@ -4,7 +4,7 @@ This work was packaged for Seznam.cz, a.s. by:
 
 This work was downloaded from:
 
-    https://pypi.python.org/pypi/shelter
+    https://github.com/seznam/shelter
 
 Copyright:
 
@@ -23,7 +23,7 @@ License:
        notice, this list of conditions and the following disclaimer in the
        documentation and/or other materials provided with the distribution.
 
-    3. Neither the name of the University nor the names of its contributors
+    3. Neither the name of the Organization nor the names of its contributors
        may be used to endorse or promote products derived from this software
        without specific prior written permission.
 
