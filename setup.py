@@ -59,7 +59,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'tornado>=4.2',
+        'tornado>=3.2',
         'six',
         'setproctitle>=1.1',
     ],
