@@ -106,8 +106,8 @@ class IniConfig(Config):
     )
 
     def __init__(self, settings, args_parser):
-        super(IniConfig, self).__init__(settings, args_parser)
         self._config_parser = get_configparser(args_parser.config)
+        super(IniConfig, self).__init__(settings, args_parser)
 
     def configure_logging(self):
         """
