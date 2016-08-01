@@ -91,7 +91,7 @@ in both. You can define additional arguments of the command line.
 
 ::
 
-    import os
+    import time
 
     from shelter.core.config import Config, argument
 
@@ -109,7 +109,10 @@ in both. You can define additional arguments of the command line.
         Database = collections.namedtuple('Database', ['host', 'db'])
 
         def initialize(self):
-            self.secret_key = os.urandom(64)
+            # initialize() is called after instance is created. If you want
+            # add some instance attributes, use this method instead of
+            # override __init__().
+            self._server_started_time = time.time()
 
         def get_config_items(self):
             # Override get_config_items() method if you want to add
@@ -123,6 +126,8 @@ in both. You can define additional arguments of the command line.
 
         @property
         def secret_key(self):
+            # If command-line argument -k/--secret-key exists, it will
+            # override settings.SECRET_KEY value.
             return self.args_parser.secret_key or self.settings.SECRET_KEY
 
         @property
@@ -230,8 +235,13 @@ Service process has to be registered in the ``settings`` module.
 ::
 
     SERVICE_PROCESSES = (
-        'myapp.processes.WarmCache',
+        ('myapp.processes.WarmCache', True, 15.0),
     )
+
+Each service process definition is list/tuple in format
+``('path.to.ClassName', wait_unless_ready, timeout)``. If *wait_unless_ready*
+is ``True``, wait maximum *timeout* seconds unless process is successfully
+started, otherwise raise ``shelter.core.exceptions.ProcessError`` exception.
 
 Management commands
 -------------------
