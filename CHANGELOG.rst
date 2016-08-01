@@ -1,3 +1,9 @@
+1.1.1
+-----
+
++ Fixed ``shelter.contrib.config.iniconfig.IniConfig`` class
++ Fixed documentation
+
 1.1.0
 -----
 
