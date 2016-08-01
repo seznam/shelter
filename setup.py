@@ -36,7 +36,7 @@ except IOError:
 
 setup(
     name="shelter",
-    version='1.1.0',
+    version='1.1.1',
     author='Jan Seifert (Seznam.cz, a.s.)',
     author_email="jan.seifert@firma.seznam.cz",
     description=description,
