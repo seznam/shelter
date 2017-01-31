@@ -209,6 +209,15 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
         self.name = "{:s}: {:s}".format(
             self.context.config.name, self.__class__.__name__)
 
+        self.initialize()
+
+    def initialize(self):
+        """
+        Initialize instance attributes. You can override this method in
+        the subclasses.
+        """
+        pass
+
     @classmethod
     def get_instance(cls, context, separate_process=True):
         """
