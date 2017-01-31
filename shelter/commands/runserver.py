@@ -102,29 +102,32 @@ class RunServer(BaseCommand):
         for tornado_app in get_tornado_apps(self.context, debug=False):
             self.init_workers(tornado_app)
         # Run workers
-        start_workers(self.workers, max_restarts=100)
+        try:
+            start_workers(self.workers, max_restarts=100)
+        except KeyboardInterrupt:
+            pass
 
     def init_workers(self, tornado_app):
         """
         For Tornado's application *tornado_app* create workers instances
         and add them into list of the management command processes.
         """
-        processes = tornado_app.settings['interface'].processes
+        interface = tornado_app.settings['interface']
+        name, processes, host, port = (
+            interface.name, interface.processes,
+            interface.host, interface.port)
         if processes <= 0:
             processes = tornado.process.cpu_count()
 
         self.logger.info(
-            "Init %d worker(s) for interface '%s'",
-            processes, tornado_app.settings['interface'].name)
+            "Init %d worker(s) for interface '%s' (%s:%d)",
+            processes, name, host, port)
 
-        sockets = tornado.netutil.bind_sockets(
-            tornado_app.settings['interface'].port,
-            address=tornado_app.settings['interface'].host)
+        sockets = tornado.netutil.bind_sockets(port, host)
         for dummy_i in six.moves.range(processes):
             self.workers.append(
                 Worker(
-                    name=tornado_app.settings['interface'].name,
-                    factory=get_worker_instance,
+                    name=name, factory=get_worker_instance,
                     args=(tornado_app, sockets, self.pid)
                 )
             )

@@ -80,6 +80,18 @@ class Worker(object):
                 while not self.process.ready:
                     time.sleep(0.1)
 
+    def stop(self):
+        """
+        Run the *worker*. If *wait_unless_ready* is :const:`True`,
+        wait maximum *timeout* seconds unless worker is started or
+        raise :exc:`shelter.core.exceptions.ProcessError` exception
+        if time is exceeded. If *timeout* is :const:`None`, wait
+        infinity seconds.
+        """
+        if not self:
+            raise ProcessError("Worker '%s' is not runnig" % self.name)
+        self.process.stop()
+
     @property
     def pid(self):
         """
@@ -177,11 +189,17 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
 
     lock_cls = type(
         'DummyLock', (object,), {
-            'acquire': lambda *args: False,
-            'release': lambda: None
+            'acquire': lambda inst, blocking, timeout: False,
+            'release': lambda inst: None
         }
     )
     ready_cls = bool
+    event_cls = type(
+        'DummyEvent', (object,), {
+            'is_set': lambda inst: False,
+            'set': lambda inst: None
+        }
+    )
     separate_process = None
 
     interval = 0
@@ -199,6 +217,7 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
         self._parent_pid = os.getpid()
         self._lock = self.lock_cls()
         self._ready = self.ready_cls(False)
+        self._stop_event = self.event_cls()
 
         if self.separate_process:
             self.context = context
@@ -229,16 +248,19 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
             ancestor_cls = multiprocessing.Process
             lock_cls = functools.partial(multiprocessing.Lock)
             ready_cls = functools.partial(multiprocessing.Value, ctypes.c_bool)
+            event_cls = functools.partial(multiprocessing.Event)
         else:
             ancestor_cls = threading.Thread
             lock_cls = functools.partial(threading.Lock)
             ready_cls = functools.partial(ctypes.c_bool)
+            event_cls = functools.partial(threading.Event)
 
         process_cls = type(
             cls.__name__, (cls, ancestor_cls), {
                 '__module__': cls.__module__,
                 'lock_cls': lock_cls,
                 'ready_cls': ready_cls,
+                'event_cls': event_cls,
                 'separate_process': separate_process,
             }
         )
@@ -260,15 +282,18 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
                 """
                 Exit service process when SIGINT is reached.
                 """
-                self._parent_pid = 0
+                self.stop()
             signal.signal(signal.SIGINT, sigint_handler)
 
         next_loop_time = 0
         while 1:
             # Exit if service process is run in separated process and pid
             # of the parent process has changed (parent process has exited
-            # and init is new parent).
-            if self.separate_process and os.getppid() != self._parent_pid:
+            # and init is new parent) or if stop flag is set.
+            if (
+                (self.separate_process and os.getppid() != self._parent_pid) or
+                self._stop_event.is_set()
+            ):
                 break
             # Repeatedly call loop method. After first call set ready flag.
             if time.time() >= next_loop_time:
@@ -301,3 +326,10 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
             return self._ready.value
         finally:
             self._lock.release()
+
+    def stop(self):
+        """
+        Set stop flag. :meth:`run` method checks this flag and if it is
+        :const:`True`, service process will be stopped.
+        """
+        self._stop_event.set()

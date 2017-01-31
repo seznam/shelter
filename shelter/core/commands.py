@@ -143,6 +143,9 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
         if not self.service_processes_in_thread:
             for worker in self.workers:
                 worker.process.terminate()
+        else:
+            for worker in self.workers:
+                worker.stop()
 
     def initialize(self):
         """

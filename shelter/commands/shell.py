@@ -13,6 +13,8 @@ class Shell(BaseCommand):
 
     name = 'shell'
     help = 'runs a python interactive interpreter'
+    service_processes_start = True
+    service_processes_in_thread = True
 
     def command(self):
         user_ns = {

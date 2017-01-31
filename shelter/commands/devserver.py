@@ -18,6 +18,8 @@ class DevServer(BaseCommand):
 
     name = 'devserver'
     help = 'run server for local development'
+    service_processes_start = True
+    service_processes_in_thread = True
 
     def command(self):
         # For each interface create Tornado application and start to
@@ -36,9 +38,13 @@ class DevServer(BaseCommand):
         # Run IOLoop
         if listen_on:
             self.stdout.write(
-                "Start server on %s, press Ctrl+C to stop\n" %
+                "Start dev server on %s, press Ctrl+C to stop\n" %
                 ", ".join(listen_on)
             )
             self.stdout.flush()
 
-            tornado.ioloop.IOLoop.instance().start()
+            try:
+                tornado.ioloop.IOLoop.instance().start()
+            except KeyboardInterrupt:
+                tornado.ioloop.IOLoop.instance().add_callback(
+                    tornado.ioloop.IOLoop.instance().stop)

@@ -60,7 +60,7 @@ Management commands which provides Shelter library:
 
 + **devserver** runs development HTTP server, which autoreloads application
   when source files are changes. Server is run only in one process, service
-  processes are run in the threads.
+  processes are run in threads.
 + **runserver** runs production HTTP, multi-process server. Number of the
   processes are detected according to ``INTERFACES`` setting in the
   ``settings`` module. Service processes are run in separated processes.
@@ -68,7 +68,7 @@ Management commands which provides Shelter library:
   it is run again. Maximum amount of the crashes are 100, then application
   will exit.
 + **shell** runs interactive Python's shell. First it tries to run *IPython*,
-  then standard *Python* shell.
+  then standard *Python* shell. Service processes are run in threads.
 + **showconfig** shows effective configuration.
 + **startproject** will generate new apllication skeleton.
 
@@ -152,7 +152,7 @@ You can define own class in ``settings`` module::
     CONTEXT_CLASS = 'myapp.core.context.Context'
 
 Overrided ``Context`` can contain additional *properties*, e.g. database
-connection pool. 
+connection pool.
 
 **It is necesary to initialize shared sources (sockets, open files, ...)
 lazy!** The reason is that subprocesses (Tornado HTTP workers, service
@@ -222,10 +222,14 @@ you must inherit ``BaseProcess``, adjust ``interval`` attribute and override
 
         interval = 30.0
 
+        def initialize(self):
+            self.db_conn = self.context.db.conn_pool
+            self.cache = self.context.cache
+
         def loop(self):
             self.logger.info("Warn cached data")
-            with self.context.db.get_connection_from_pool() as db:
-                self.context.set('key', db.get_data(), timeout=60)
+            with self.db_conn.get() as db:
+                self.cache.set('key', db.get_data(), timeout=60)
 
 + **interval** is a time in seconds. After this time ``loop()`` method is
   repeatedly called.
@@ -355,7 +359,7 @@ Tuple/list **urls_default** is handled into relevant interface in the
 
 HTTP handler is a subclass of the ``shelter.core.web.BaseRequestHandler``
 which enhances ``tornado.web.RequestHandler``. Provides additional instance
-attributes **logger**, **context** and **interface**.
+attributes/properties **logger**, **context** and **interface**.
 
 + **logger** is an instance of the ``logging.Logger`` from *Python's standard
   library*. Logger name is derived from handlers's name, e.g
