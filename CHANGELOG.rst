@@ -1,3 +1,12 @@
+1.1.2
+-----
+
++ *devserver* and *shell* management commands now start service processes
+  in threads.
++ Add ``initialize()`` method into ``shelter.core.processes.BaseProcess``
+  class.
++ Some minor improvements.
+
 1.1.1
 -----
 
