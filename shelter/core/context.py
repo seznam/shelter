@@ -18,6 +18,8 @@ class Context(object):
        constructor, it is necessary initialize them lazy!
     """
 
+    _child_initialized = False
+
     def __init__(self, config):
         self._config = config
         self.initialize()
@@ -32,8 +34,17 @@ class Context(object):
 
     def initialize(self):
         """
-        Initialize instance attributes. You can override this method in
-        the subclasses.
+        Initialize instance attributes. This method is called when instance
+        is initialized. You can override this method in the subclasses.
+        """
+        pass
+
+    def initialize_child(self):
+        """
+        Initialize instance attributes, it is similar to :meth:`initialize`.
+        However, method is called only in the children (workers of the
+        Tornado, service process) when child is initialized and before HTTP
+        server is started. You can override this method in the subclasses.
         """
         pass
 

@@ -285,6 +285,10 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
                 self.stop()
             signal.signal(signal.SIGINT, sigint_handler)
 
+        if not self.context.__class__._child_initialized:
+            self.context.__class__._child_initialized = True
+            self.context.initialize_child()
+
         next_loop_time = 0
         while 1:
             # Exit if service process is run in separated process and pid

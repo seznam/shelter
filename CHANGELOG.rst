@@ -1,3 +1,8 @@
+1.1.3
+-----
+
+* Add ``initialize_child()`` method into ``shelter.core.context.Context``
+
 1.1.2
 -----
 

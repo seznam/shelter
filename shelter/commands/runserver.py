@@ -48,6 +48,10 @@ def tornado_worker(tornado_app, sockets, parent_pid):
 
     tornado_app.settings['context'].config.configure_logging()
 
+    if not tornado_app.settings['context'].__class__._child_initialized:
+        tornado_app.settings['context'].__class__._child_initialized = True
+        tornado_app.settings['context'].initialize_child()
+
     # Run HTTP server
     http_server = tornado.httpserver.HTTPServer(tornado_app)
     http_server.add_sockets(sockets)
