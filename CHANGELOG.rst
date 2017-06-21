@@ -2,6 +2,7 @@
 -----
 
 * Add ``initialize_child()`` method into ``shelter.core.context.Context``
+* Always restart worker when it stop
 
 1.1.2
 -----

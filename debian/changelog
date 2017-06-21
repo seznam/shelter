@@ -1,8 +1,9 @@
 python-shelter (1.1.3~dev) unstable; urgency=medium
 
   * Add initialize_child() method into shelter.core.context.Context
+  * Always restart worker when it stop
 
- -- Jan Seifert <jan.seifert@firma.seznam.cz>  Tue, 31 Jan 2017 09:38:43 +0100
+ -- Jan Seifert <jan.seifert@firma.seznam.cz>  Tue, 21 Jun 2017 12:21:51 +0200
 
 python-shelter (1.1.2) unstable; urgency=medium
 

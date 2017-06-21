@@ -142,10 +142,10 @@ def start_workers(workers, max_restarts=-1):
                 if not worker.has_started:
                     worker.start()
                     continue
-                # When worker has been signaled or crashed, start it again
-                # and decrement max_restarts counter
+                # When worker has stopped, start it again
                 exitcode = worker.exitcode
                 if exitcode != 0:
+                    # Worker has been signaled or crashed
                     if exitcode > 0:
                         logger.error(
                             "Worker '%s' with pid %d died due to error",
@@ -161,11 +161,19 @@ def start_workers(workers, max_restarts=-1):
                     if not max_restarts:
                         logger.fatal("Too many child restarts")
                         break
-                    # Start worker again and decrement max_restarts counter
+                    # Start worker again
                     worker.start()
+                    # Decrement max_restarts counter
                     if max_restarts > 0:
                         max_restarts -= 1
-                    continue
+                else:
+                    # Worker has stopped without error
+                    logger.error(
+                        "Worker '%s' with pid %d has stopped",
+                        worker.name, worker.pid
+                    )
+                    # Start worker again
+                    worker.start()
         else:
             time.sleep(0.1)
             continue
