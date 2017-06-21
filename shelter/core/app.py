@@ -24,6 +24,8 @@ def get_tornado_apps(context, debug=False):
         if not urls:
             urls = [tornado.web.URLSpec('/', NullHandler)]
         for url in urls:
+            if url.kwargs is None:
+                url.kwargs = {}
             url.kwargs['context'] = context
             url.kwargs['interface'] = interface
         apps.append(
