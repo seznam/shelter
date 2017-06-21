@@ -82,11 +82,8 @@ class Worker(object):
 
     def stop(self):
         """
-        Run the *worker*. If *wait_unless_ready* is :const:`True`,
-        wait maximum *timeout* seconds unless worker is started or
-        raise :exc:`shelter.core.exceptions.ProcessError` exception
-        if time is exceeded. If *timeout* is :const:`None`, wait
-        infinity seconds.
+        Stop the *worker*. If worker is not run, raise
+        :exc:`shelter.core.exceptions.ProcessError`.
         """
         if not self:
             raise ProcessError("Worker '%s' is not runnig" % self.name)
