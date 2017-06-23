@@ -164,8 +164,8 @@ def start_workers(workers, max_restarts=-1):
                     # Worker has been signaled or crashed
                     if exitcode > 0:
                         logger.error(
-                            "Worker '%s' with pid %d died due to error",
-                            worker.name, worker.pid
+                            "Worker '%s' with pid %d died with exitcode=%r",
+                            worker.name, worker.pid, exitcode
                         )
                     else:
                         logger.error(
