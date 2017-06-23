@@ -64,9 +64,10 @@ Management commands which provides Shelter library:
 + **runserver** runs production HTTP, multi-process server. Number of the
   processes are detected according to ``INTERFACES`` setting in the
   ``settings`` module. Service processes are run in separated processes.
-  Parent process checks child processes and when child process crashes,
-  it is run again. Maximum amount of the crashes are 100, then application
-  will exit.
+  Parent process checks child processes and when child process exits (itself
+  or due to crash or signal), it is run again. Crashes are counted, maximum
+  amount of the crashes are 100, then whole application will exit. If child
+  stops with exit code 0, crash counter is not incremented.
 + **shell** runs interactive Python's shell. First it tries to run *IPython*,
   then standard *Python* shell. Service processes are run in threads.
 + **showconfig** shows effective configuration.
@@ -159,8 +160,16 @@ lazy!** The reason is that subprocesses (Tornado HTTP workers, service
 processes) have to get uninitialized ``Context``, because forked resources
 can cause a lot of nights without dreams... **Also it is necessary to known
 that Context is shared among coroutines!** So you are responsible for
-locking shared resources (be carreful, it is blocking operation) or use
+locking shared resources (be careful, it is blocking operation) or use
 another mechanism, e.g. database connection pool.
+
+``Context`` class contains two methods, ``initialize()`` and
+``initialize_child()``. ``initialize()`` is called from constructor during
+instance is initialized. So it is the best place where you can initialize
+attributes which can be shared among processes. ``initialize_child()`` is
+called when forked child process is initialized, but it is not called in
+the main process. So it is the best place where you can safely initialize
+shared resources like a database connection.
 
 ::
 
@@ -169,12 +178,23 @@ another mechanism, e.g. database connection pool.
         def initialize(self):
             self._database = None
 
+        def initialize_child(self):
+            # Initialize database in the subprocesses when child is created
+            self._init_database(max_connections=10)
+
+        def _init_database(self, max_connections):
+            self._database = ConnectionPool(
+                self.config.database.host,
+                self.config.database.db,
+                max_connections=max_connections,
+                connect_on_init=True)
+
         @property
         def database(self):
+            # Lazy property if you need database connection in
+            # the main process (e.g. management command)
             if self._database is None:
-                self._database = ConnectionPool(
-                    self.config.database.host,
-                    self.config.database.db)
+                self._init_database(max_connections=1)
             return self._database
 
 Hooks
