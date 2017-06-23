@@ -18,7 +18,7 @@ import tornado.process
 
 from shelter.core.app import get_tornado_apps
 from shelter.core.commands import BaseCommand
-from shelter.core.processes import Worker, start_workers
+from shelter.core.processes import Worker, start_workers, TORNADO_WORKER
 
 
 def stop_child(http_server, parent_pid):
@@ -39,18 +39,17 @@ def tornado_worker(tornado_app, sockets, parent_pid):
     """
     Tornado worker which process HTTP requests.
     """
-    setproctitle.setproctitle(
-        "{:s}: worker {:s}".format(
-            tornado_app.settings['context'].config.name,
-            tornado_app.settings['interface'].name
-        )
+    context = tornado_app.settings['context']
+
+    setproctitle.setproctitle("{:s}: worker {:s}".format(
+        context.config.name, tornado_app.settings['interface'].name)
     )
 
-    tornado_app.settings['context'].config.configure_logging()
+    context.config.configure_logging()
 
-    if not tornado_app.settings['context'].__class__._child_initialized:
-        tornado_app.settings['context'].__class__._child_initialized = True
-        tornado_app.settings['context'].initialize_child()
+    if not context.__class__._child_initialized:
+        context.__class__._child_initialized = True
+        context.initialize_child(TORNADO_WORKER, app=tornado_app)
 
     # Run HTTP server
     http_server = tornado.httpserver.HTTPServer(tornado_app)

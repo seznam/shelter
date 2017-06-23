@@ -19,8 +19,20 @@ import six
 from shelter.core.exceptions import ProcessError
 from shelter.utils.logging import AddLoggerMeta
 
-__all__ = ['BaseProcess']
+__all__ = ['BaseProcess', 'SERVICE_PROCESS', 'TORNADO_WORKER']
 
+SERVICE_PROCESS = 'service_process'
+"""
+Indicates that type of the process is a service process. *kwargs* argument
+in method :meth:`shelter.core.context.initialize_child` contains *process*,
+which holds instance of the service process.
+"""
+TORNADO_WORKER = 'tornado_worker'
+"""
+Indicates that type of the process is a Tornado HTTP worker. *kwargs*
+argument in method :meth:`shelter.core.context.initialize_child` contains
+*app*, which holds Tornado's application associated with this worker.
+"""
 
 SIGNALS_TO_NAMES_DICT = {
     getattr(signal, n): n for n in dir(signal) if
@@ -141,6 +153,10 @@ def start_workers(workers, max_restarts=-1):
                 # When worker has not been started, start it
                 if not worker.has_started:
                     worker.start()
+                    logger.info(
+                        "Worker '%s' has been started with pid %d",
+                        worker.name, worker.pid
+                    )
                     continue
                 # When worker has stopped, start it again
                 exitcode = worker.exitcode
@@ -168,12 +184,16 @@ def start_workers(workers, max_restarts=-1):
                         max_restarts -= 1
                 else:
                     # Worker has stopped without error
-                    logger.error(
+                    logger.info(
                         "Worker '%s' with pid %d has stopped",
                         worker.name, worker.pid
                     )
                     # Start worker again
                     worker.start()
+                    logger.info(
+                        "Worker '%s' has been started with pid %d",
+                        worker.name, worker.pid
+                    )
         else:
             time.sleep(0.1)
             continue
@@ -292,7 +312,7 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
 
         if not self.context.__class__._child_initialized:
             self.context.__class__._child_initialized = True
-            self.context.initialize_child()
+            self.context.initialize_child(SERVICE_PROCESS, process=self)
 
         next_loop_time = 0
         while 1:
