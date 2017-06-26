@@ -64,6 +64,7 @@ class StartProject(BaseCommand):
     )
     service_processes_start = False
     settings_required = False
+    call_initialize_child_in_main = False
 
     def command(self):
         substitute_map = {

@@ -47,8 +47,8 @@ def tornado_worker(tornado_app, sockets, parent_pid):
 
     context.config.configure_logging()
 
-    if not context.__class__._child_initialized:
-        context.__class__._child_initialized = True
+    if not context._child_initialized:
+        context._child_initialized = True
         context.initialize_child(TORNADO_WORKER, app=tornado_app)
 
     # Run HTTP server
@@ -95,6 +95,7 @@ class RunServer(BaseCommand):
     help = 'run server'
     service_processes_start = True
     service_processes_in_thread = False
+    call_initialize_child_in_main = False
 
     def command(self):
         setproctitle.setproctitle(

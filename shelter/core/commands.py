@@ -10,7 +10,7 @@ import sys
 import six
 
 from shelter.core.cmdlineparser import argument
-from shelter.core.processes import Worker
+from shelter.core.processes import Worker, MAIN_PROCESS
 from shelter.utils.imports import import_object
 from shelter.utils.logging import AddLoggerMeta
 
@@ -83,6 +83,8 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
     is necessary for start the application.
     """
 
+    call_initialize_child_in_main = True
+
     def __init__(self, config):
         self.context = config.context_class.from_config(config)
         self.stdout = sys.stdout
@@ -137,6 +139,11 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
         # Start service processes
         if self.service_processes_start:
             self.start_service_processes()
+        # Call initialize_child() in the main process
+        if (self.call_initialize_child_in_main and
+                not self.context._child_initialized):
+            self.context._child_initialized = True
+            self.context.initialize_child(MAIN_PROCESS, command=self)
         # Run command
         self.command()
         # Stop service processes

@@ -164,12 +164,21 @@ locking shared resources (be careful, it is blocking operation) or use
 another mechanism, e.g. database connection pool.
 
 ``Context`` class contains two methods, ``initialize()`` and
-``initialize_child()``. ``initialize()`` is called from constructor during
-instance is initialized. So it is the best place where you can initialize
-attributes which can be shared among processes. ``initialize_child()`` is
-called when forked child process is initialized, but it is not called in
-the main process. So it is the best place where you can safely initialize
-shared resources like a database connection.
+``initialize_child()``.
+
+``initialize()`` is called from constructor during instance is initialized.
+So it is the best place where you can initialize attributes which can be
+shared among processes.
+
+``initialize_child()`` is called when service processes or Tornado workers
+are initialized. So it is the best place where you can safely initialize
+shared resources like a database connection. *process_type* argument contains
+type of the child – **shelter.core.processes.MAIN_PROCESS**,
+**shelter.core.processes.SERVICE_PROCESS** or
+**shelter.core.processes.TORNADO_WORKER**. *kwargs* contains additional data
+according to *process_type*, instance of the management command for
+**MAIN_PROCESS**, instance of the service process for **SERVICE_PROCESS** and
+instance of the Tornado application for **TORNADO_WORKER**.
 
 ::
 
@@ -178,7 +187,7 @@ shared resources like a database connection.
         def initialize(self):
             self._database = None
 
-        def initialize_child(self):
+        def initialize_child(self, process_type, **kwargs):
             # Initialize database in the subprocesses when child is created
             self._init_database(max_connections=10)
 

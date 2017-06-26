@@ -19,8 +19,14 @@ import six
 from shelter.core.exceptions import ProcessError
 from shelter.utils.logging import AddLoggerMeta
 
-__all__ = ['BaseProcess', 'SERVICE_PROCESS', 'TORNADO_WORKER']
+__all__ = ['BaseProcess', 'MAIN_PROCESS', 'SERVICE_PROCESS', 'TORNADO_WORKER']
 
+MAIN_PROCESS = 'main_process'
+"""
+Indicates that type of the process is a main process. *kwargs* argument
+in method :meth:`shelter.core.context.initialize_child` contains *command*,
+which holds instance of the management command.
+"""
 SERVICE_PROCESS = 'service_process'
 """
 Indicates that type of the process is a service process. *kwargs* argument
@@ -310,8 +316,8 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
                 self.stop()
             signal.signal(signal.SIGINT, sigint_handler)
 
-        if not self.context.__class__._child_initialized:
-            self.context.__class__._child_initialized = True
+        if not self.context._child_initialized:
+            self.context._child_initialized = True
             self.context.initialize_child(SERVICE_PROCESS, process=self)
 
         next_loop_time = 0
