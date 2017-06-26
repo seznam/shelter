@@ -5,3 +5,5 @@
 .project
 .pydevproject
 .coverage
+.pybuild
+*.log
