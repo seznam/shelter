@@ -173,12 +173,12 @@ shared among processes.
 ``initialize_child()`` is called when service processes or Tornado workers
 are initialized. So it is the best place where you can safely initialize
 shared resources like a database connection. *process_type* argument contains
-type of the child – **shelter.core.processes.MAIN_PROCESS**,
-**shelter.core.processes.SERVICE_PROCESS** or
-**shelter.core.processes.TORNADO_WORKER**. *kwargs* contains additional data
-according to *process_type*, instance of the management command for
-**MAIN_PROCESS**, instance of the service process for **SERVICE_PROCESS** and
-instance of the Tornado application for **TORNADO_WORKER**.
+type of the child – **shelter.core.processes.MAIN_PROCESS**, **SERVICE_PROCESS** or
+**TORNADO_WORKER**. *kwargs* contains additional data according to *process_type*:
+
++ *command* key with instance of the management command for **MAIN_PROCESS**
++ *process* key with instance of the service process for **SERVICE_PROCESS**
++ *app* key with instance of the Tornado application for **TORNADO_WORKER**
 
 ::
 
@@ -333,6 +333,10 @@ method and/or ``initialize()`` method.
 + **settings_required** If it is ``True``, `settings` module will not be
   required. **It is not public API, do not use this attribute unless you
   really know what you are doing**!
++ **call_initialize_child_in_main** If it is ``True``,
+  call *shelter.core.context.Context.initialize_child* method when child
+  (service process, Tornado HTTP worker) is created. **It is not public API,
+  do not use this attribute unless you really know what you are doing**!
 
 Management command has to be registered in the ``settings`` module.
 

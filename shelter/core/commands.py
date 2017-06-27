@@ -84,6 +84,11 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
     """
 
     call_initialize_child_in_main = True
+    """
+    Initialize :class:`shelter.core.context.Context` flag. If :const:`True`,
+    call :meth:`shelter.core.context.Context.initialize_child` method when
+    child (service process, Tornado HTTP worker) is created.
+    """
 
     def __init__(self, config):
         self.context = config.context_class.from_config(config)
