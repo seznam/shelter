@@ -40,19 +40,20 @@ def tornado_worker(tornado_app, sockets, parent_pid):
     Tornado worker which process HTTP requests.
     """
     context = tornado_app.settings['context']
-
+    # Set process name
     setproctitle.setproctitle("{:s}: worker {:s}".format(
         context.config.name, tornado_app.settings['interface'].name)
     )
-
+    # Configure logging
     context.config.configure_logging()
-
+    # Create HTTP server instance
+    http_server = tornado.httpserver.HTTPServer(tornado_app)
+    # Call Context.initialize_child()
     if not context._child_initialized:
         context._child_initialized = True
-        context.initialize_child(TORNADO_WORKER, app=tornado_app)
-
+        context.initialize_child(
+            TORNADO_WORKER, app=tornado_app, http_server=http_server)
     # Run HTTP server
-    http_server = tornado.httpserver.HTTPServer(tornado_app)
     http_server.add_sockets(sockets)
 
     # Register SIGINT handler which will stop worker
@@ -71,7 +72,6 @@ def tornado_worker(tornado_app, sockets, parent_pid):
     stop_callback = tornado.ioloop.PeriodicCallback(
         functools.partial(stop_child, http_server, parent_pid), 250)
     stop_callback.start()
-
     # Run IOLoop
     tornado.ioloop.IOLoop.instance().start()
 

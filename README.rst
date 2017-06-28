@@ -173,12 +173,17 @@ shared among processes.
 ``initialize_child()`` is called when service processes or Tornado workers
 are initialized. So it is the best place where you can safely initialize
 shared resources like a database connection. *process_type* argument contains
-type of the child – **shelter.core.processes.MAIN_PROCESS**, **SERVICE_PROCESS** or
-**TORNADO_WORKER**. *kwargs* contains additional data according to *process_type*:
+type of the child – **shelter.core.processes.MAIN_PROCESS**,
+**SERVICE_PROCESS** or **TORNADO_WORKER**. *kwargs* contains additional data
+according to *process_type*:
 
-+ *command* key with instance of the management command for **MAIN_PROCESS**
-+ *process* key with instance of the service process for **SERVICE_PROCESS**
-+ *app* key with instance of the Tornado application for **TORNADO_WORKER**
++ for **MAIN_PROCESS** contains *command* key with instance of the
+  management command.
++ for **SERVICE_PROCESS** contains *process* key with instance of the
+  service process.
++ for **TORNADO_WORKER** contains *app* key with instance of the
+  ``tornado.web.Application`` and *http_server* key with instance of
+  the ``tornado.httpserver.HTTPServer``.
 
 ::
 
