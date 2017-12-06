@@ -12,7 +12,6 @@ from six.moves import configparser
 from shelter.contrib.config.iniconfig import (
     get_conf_d_files, get_conf_files, get_configparser, IniConfig
 )
-from shelter.core.config import Config
 from shelter.core.exceptions import ImproperlyConfiguredError
 from shelter.core.context import Context
 
@@ -93,7 +92,7 @@ def test_get_configparser_no_conf_d_dir(m, test_conf_dir):
 
 
 def test_get_configparser_config_does_not_exist(test_conf_dir):
-    conf_filename = os.path.join(test_conf_dir, 'example3.conf')
+    conf_filename = os.path.join(test_conf_dir, 'example_not_exists.conf')
     with pytest.raises(ValueError) as e:
         get_configparser(conf_filename)
     assert 'is not a file' in str(e)
@@ -123,14 +122,44 @@ def test_config_interfaces(test_conf_dir):
 
     interfaces = sorted(config.interfaces, key=lambda x: x.name)
 
-    assert len(interfaces) == 2
+    assert len(interfaces) == 3
 
     assert interfaces[0].name == 'fastrpc'
     assert interfaces[0].host == '192.168.1.0'
     assert interfaces[0].port == 4445
+    assert interfaces[0].unix_socket == None
     assert len(interfaces[0].urls) == 0
 
     assert interfaces[1].name == 'http'
     assert interfaces[1].host == ''
     assert interfaces[1].port == 4444
+    assert interfaces[1].unix_socket == None
     assert len(interfaces[1].urls) == 2
+
+    assert interfaces[2].name == 'http_unix'
+    assert interfaces[2].host == None
+    assert interfaces[2].port == None
+    assert interfaces[2].unix_socket == '/tmp/tornadoini.socket'
+    assert len(interfaces[2].urls) == 2
+
+
+def test_config_bad_interface_both_tcp_and_unix(test_conf_dir):
+    conf_filename = os.path.join(test_conf_dir, 'example5.conf')
+    with pytest.raises(ValueError) as e:
+        parser = ArgumentParser()
+        parser.add_argument('-f', dest='config')
+        config = IniConfig(importlib.import_module('tests.settings5'),
+                           parser.parse_args(['-f', conf_filename]))
+        _ = config.interfaces
+    assert "Interface MUST NOT listen on both TCP and UNIX socket" in str(e)
+
+
+def test_config_bad_interface_neither_tcp_nor_unix(test_conf_dir):
+    conf_filename = os.path.join(test_conf_dir, 'example6.conf')
+    with pytest.raises(ValueError) as e:
+        parser = ArgumentParser()
+        parser.add_argument('-f', dest='config')
+        config = IniConfig(importlib.import_module('tests.settings6'),
+                           parser.parse_args(['-f', conf_filename]))
+        _ = config.interfaces
+    assert "Interface MUST listen either on TCP or UNIX socket" in str(e)

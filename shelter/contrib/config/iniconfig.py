@@ -145,12 +145,28 @@ class IniConfig(Config):
             self._cached_values['interfaces'] = []
             for name, interface in six.iteritems(self.settings.INTERFACES):
                 interface_name = 'interface_%s' % name
-                # Hostname + port
+                # Hostname + port or unix socket
                 try:
-                    host, port = parse_host(
-                        self.config_parser.get(interface_name, 'Listen'))
+                    listen = self.config_parser.get(interface_name, 'Listen')
                 except CONFIGPARSER_EXC:
-                    host, port = parse_host(interface['LISTEN'])
+                    listen = interface.get('LISTEN')
+
+                try:
+                    unix_socket = self.config_parser.get(interface_name,
+                                                         'UnixSocket')
+                except CONFIGPARSER_EXC:
+                    unix_socket = interface.get('UNIX_SOCKET')
+                if listen and unix_socket:
+                    raise ValueError(
+                        'Interface MUST NOT listen on both TCP and UNIX socket'
+                    )
+                elif listen:
+                    host, port = parse_host(listen)
+                elif unix_socket:
+                    host, port = (None, None)
+                else:
+                    raise ValueError(
+                        'Interface MUST listen either on TCP or UNIX socket')
                 # Processes
                 try:
                     processes = self.config_parser.getint(
@@ -169,6 +185,7 @@ class IniConfig(Config):
                     urls = ()
 
                 self._cached_values['interfaces'].append(
-                    self.Interface(name, host, port, processes, urls)
+                    self.Interface(
+                        name, host, port, unix_socket,processes, urls)
                 )
         return self._cached_values['interfaces']

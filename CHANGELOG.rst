@@ -1,3 +1,8 @@
+1.1.3
+-----
+
++ Interfaces now support unix sockets for communication.
+
 1.1.2
 -----
 
