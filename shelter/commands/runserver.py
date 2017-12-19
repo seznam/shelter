@@ -113,28 +113,30 @@ class RunServer(BaseCommand):
         and add them into list of the management command processes.
         """
         interface = tornado_app.settings['interface']
+
+        if not interface.port and not interface.unix_socket:
+            raise ValueError(
+                'Interface MUST listen either on TCP '
+                'or UNIX socket or both')
+
         name, processes, host, port, unix_socket = (
             interface.name, interface.processes,
             interface.host, interface.port, interface.unix_socket)
         if processes <= 0:
             processes = tornado.process.cpu_count()
+        sockets = []
+        listen_on = []
 
-        if port and unix_socket:
-            raise ValueError(
-                'Interface MUST NOT listen on both TCP socket and UNIX socket')
-        elif port:
-            sockets = tornado.netutil.bind_sockets(port, host)
-            self.logger.info(
-                "Init %d worker(s) for interface '%s' (%s:%d)",
-                processes, name, host, port)
-        elif unix_socket:
-            sockets = [tornado.netutil.bind_unix_socket(unix_socket)]
-            self.logger.info(
-                "Init %d worker(s) for interface '%s' (%s)",
-                processes, name, unix_socket)
-        else:
-            raise ValueError(
-                'Interface MUST listen either on TCP socket or UNIX socket')
+        if port:
+            sockets.extend(tornado.netutil.bind_sockets(port, host))
+            listen_on.append("{:s}:{:d}".format(host, port))
+        if unix_socket:
+            sockets.append(tornado.netutil.bind_unix_socket(unix_socket))
+            listen_on.append("{:s}".format(interface.unix_socket))
+
+        self.logger.info(
+            "Init %d worker(s) for interface '%s' (%s)",
+            processes, name, ", ".join(listen_on))
 
         for dummy_i in six.moves.range(processes):
             self.workers.append(

@@ -120,19 +120,13 @@ class Config(object):
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
             for name, interface in six.iteritems(self.settings.INTERFACES):
-                if interface.get('LISTEN') and interface.get('UNIX_SOCKET'):
+                listen = interface.get('LISTEN')
+                unix_socket = interface.get('UNIX_SOCKET')
+                if not listen and not unix_socket:
                     raise ValueError(
-                        'Interface MUST NOT listen on both TCP and UNIX socket'
-                    )
-                elif interface.get('LISTEN'):
-                    host, port = parse_host(interface['LISTEN'])
-                    unix_socket = None
-                elif interface.get('UNIX_SOCKET'):
-                    unix_socket = interface['UNIX_SOCKET']
-                    host, port = (None, None)
-                else:
-                    raise ValueError(
-                        'Interface MUST listen either on TCP or UNIX socket')
+                        'Interface MUST listen either on TCP '
+                        'or UNIX socket or both')
+                host, port = parse_host(listen) if listen else (None, None)
                 processes = int(interface.get('PROCESSES', 1))
                 urls_obj_name = interface.get('URLS', '')
                 if urls_obj_name:

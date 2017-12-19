@@ -29,4 +29,4 @@ def test_get_tornado_apps():
 
     assert isinstance(apps[2].settings['context'], Context)
     assert isinstance(apps[2].settings['interface'], Config.Interface)
-    assert apps[2].settings['interface'].name == 'http_unix'
+    assert apps[2].settings['interface'].name == 'unix'

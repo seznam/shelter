@@ -56,25 +56,28 @@ def test_config_interfaces():
     assert interfaces[1].port == 4443
     assert len(interfaces[1].urls) == 2
 
-    assert interfaces[2].name == 'http_unix'
-    assert interfaces[2].host == None
-    assert interfaces[2].port == None
+    assert interfaces[2].name == 'unix'
+    assert interfaces[2].host is None
+    assert interfaces[2].port is None
     assert interfaces[2].unix_socket == '/tmp/tornado.socket'
-    assert len(interfaces[1].urls) == 2
+    assert len(interfaces[2].urls) == 3
 
 
-def test_config_bad_interface_both_tcp_and_unix():
+def test_config_interfaces_both_tcp_and_unix():
     config = Config(
         importlib.import_module('tests.settings5'),
         ArgumentParser()
     )
 
-    with pytest.raises(ValueError) as e:
-        _ = config.interfaces
-    assert "Interface MUST NOT listen on both TCP and UNIX socket" in str(e)
+    interface = config.interfaces[0]
+
+    assert interface.name == 'http_both_tcp_and_unix'
+    assert interface.host == ''
+    assert interface.port == 4443
+    assert interface.unix_socket == '/tmp/tornado.socket'
 
 
-def test_config_bad_interface_neither_tcp_nor_unix():
+def test_config_interface_fail_when_neither_tcp_nor_unix():
     config = Config(
         importlib.import_module('tests.settings6'),
         ArgumentParser()

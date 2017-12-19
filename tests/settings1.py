@@ -14,9 +14,9 @@ INTERFACES = {
     'fastrpc': {
         'LISTEN': '192.168.1.0:4445',
     },
-    'http_unix': {
+    'unix': {
         'UNIX_SOCKET': '/tmp/tornado.socket',
         'PROCESSES': 12,
-        'URLS': 'tests.urls1.urls_http',
+        'URLS': 'tests.urls1.urls_unix',
     },
 }

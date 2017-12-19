@@ -37,6 +37,9 @@ INTERFACES = {
         # incomming requests.
         'LISTEN': ':8000',
 
+        # Path to desired unix socket
+        # 'UNIX_SOCKET': '/run/myapp.sock',
+
         # Number of the server processes. Positive number, 0 means number
         # of the CPU cores.
         'PROCESSES': 0,

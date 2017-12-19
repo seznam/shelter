@@ -28,26 +28,22 @@ class DevServer(BaseCommand):
         for app in get_tornado_apps(self.context, debug=True):
             interface = app.settings['interface']
 
-            if interface.port and interface.unix_socket:
+            if not interface.port and not interface.unix_socket:
                 raise ValueError(
-                    'Interface MUST NOT listen on both TCP and UNIX socket')
-            elif interface.port:
+                    'Interface MUST listen either on TCP '
+                    'or UNIX socket or both')
+
+            server = tornado.httpserver.HTTPServer(app)
+
+            if interface.port:
                 host, port = interface.host, interface.port
                 sockets = tornado.netutil.bind_sockets(port, address=host)
-
-                server = tornado.httpserver.HTTPServer(app)
-                server.add_sockets(sockets)
-
                 listen_on.append("{:s}:{:d}".format(host, port))
-            elif interface.unix_socket:
-                server = tornado.httpserver.HTTPServer(app)
-                socket = tornado.netutil.bind_unix_socket(
-                    interface.unix_socket)
-                server.add_socket(socket)
+            if interface.unix_socket:
+                sockets = [
+                    tornado.netutil.bind_unix_socket(interface.unix_socket)]
                 listen_on.append("{:s}".format(interface.unix_socket))
-            else:
-                raise ValueError(
-                    'Interface MUST listen either on TCP or UNIX socket')
+            server.add_sockets(sockets)
 
         # Run IOLoop
         if listen_on:

@@ -8,3 +8,10 @@ urls_http = (
     URLSpec('/baz/', NullHandler),
     URLSpec('/bar/', NullHandler),
 )
+
+
+urls_unix = (
+    URLSpec('/baz/', NullHandler),
+    URLSpec('/bar/', NullHandler),
+    URLSpec('/foo/', NullHandler),
+)

@@ -318,15 +318,18 @@ Interfaces
 
 *Tornado's HTTP server* can be run in multiple instances. Interface are
 defined in ``settings`` module. Interfaces can be set as either TCP/IP sockets
-(``LISTEN`` directive) or unix sockets (``UNIX_SOCKET`` directive).
+(``LISTEN`` directive) or unix sockets (``UNIX_SOCKET`` directive) or both.
 
 ::
 
     INTERFACES = {
-        'example_as_tcp': {
+        'default': {
             # IP/hostname (not required) and port where the interface
-            # listen to requests
+            # listens to requests
             'LISTEN': ':8000',
+
+            # Path to desired unix socket
+            'UNIX_SOCKET': '/run/myapp.sock',
 
             # Amount of the server processes if application is run
             # using runserver command. Positive integer, 0 will
@@ -335,14 +338,7 @@ defined in ``settings`` module. Interfaces can be set as either TCP/IP sockets
 
             # Path in format 'path.to.module.variable_name' where
             # urls patterns are defined
-            'URLS': 'myapp.urls.urls_default',
-        },
-        'example_as_unix': {
-            # Path to desired unix socket
-            'UNIX_SOCKET': '/tmp/tornado.sock',
-
-            'PROCESSES': 0,
-            'URLS': 'myapp.urls.more_urls',
+            'URLS': 'myapp.urls.default_urls',
         },
     }
 
