@@ -36,7 +36,7 @@ or
 
     SHELTER_SETTINGS_MODULE=myapp.settings shelter-admin
 
-Ussage
+Usage
 ------
 
 ::
@@ -355,15 +355,19 @@ Interfaces
 ----------
 
 *Tornado's HTTP server* can be run in multiple instances. Interface are
-defined in ``settings`` module.
+defined in ``settings`` module. Interfaces can be set as either TCP/IP sockets
+(``LISTEN`` directive) or unix sockets (``UNIX_SOCKET`` directive) or both.
 
 ::
 
     INTERFACES = {
         'default': {
             # IP/hostname (not required) and port where the interface
-            # listen to requests
+            # listens to requests
             'LISTEN': ':8000',
+
+            # Path to desired unix socket
+            'UNIX_SOCKET': '/run/myapp.sock',
 
             # Amount of the server processes if application is run
             # using runserver command. Positive integer, 0 will
@@ -372,7 +376,7 @@ defined in ``settings`` module.
 
             # Path in format 'path.to.module.variable_name' where
             # urls patterns are defined
-            'URLS': 'myapp.urls.urls_default',
+            'URLS': 'myapp.urls.default_urls',
         },
     }
 

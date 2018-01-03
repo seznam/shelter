@@ -17,7 +17,7 @@ def test_get_tornado_apps():
     apps = sorted(
         get_tornado_apps(context), key=lambda x: x.settings['interface'].name)
 
-    assert len(apps) == 2
+    assert len(apps) == 3
 
     assert isinstance(apps[0].settings['context'], Context)
     assert isinstance(apps[0].settings['interface'], Config.Interface)
@@ -26,3 +26,7 @@ def test_get_tornado_apps():
     assert isinstance(apps[1].settings['context'], Context)
     assert isinstance(apps[1].settings['interface'], Config.Interface)
     assert apps[1].settings['interface'].name == 'http'
+
+    assert isinstance(apps[2].settings['context'], Context)
+    assert isinstance(apps[2].settings['interface'], Config.Interface)
+    assert apps[2].settings['interface'].name == 'unix'

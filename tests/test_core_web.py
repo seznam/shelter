@@ -20,7 +20,10 @@ def test_null_handler():
         h = NullHandler()
         h.initialize(
             context=object(),
-            interface=Config.Interface('foo', '', 1, 0, [])
+            interface=Config.Interface(
+                name='foo', host='', port=1, unix_socket=None,
+                processes=0, urls=[]
+            )
         )
         h.get()
 

@@ -1,8 +1,9 @@
 1.1.3
 -----
 
-* Add ``initialize_child()`` method into ``shelter.core.context.Context``
-* Always restart worker when it stops
++ Add ``initialize_child()`` method into ``shelter.core.context.Context``
++ Always restart worker when it stops
++ Interfaces now support UNIX sockets for communication
 
 1.1.2
 -----

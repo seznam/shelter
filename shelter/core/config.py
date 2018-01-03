@@ -28,7 +28,8 @@ class Config(object):
     """
 
     Interface = collections.namedtuple(
-        'Interface', ['name', 'host', 'port', 'processes', 'urls']
+        'Interface',
+        ['name', 'host', 'port', 'unix_socket', 'processes', 'urls']
     )
     """
     Container which encapsulates arguments of the interface.
@@ -119,7 +120,13 @@ class Config(object):
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
             for name, interface in six.iteritems(self.settings.INTERFACES):
-                host, port = parse_host(interface['LISTEN'])
+                listen = interface.get('LISTEN')
+                unix_socket = interface.get('UNIX_SOCKET')
+                if not listen and not unix_socket:
+                    raise ValueError(
+                        'Interface MUST listen either on TCP '
+                        'or UNIX socket or both')
+                host, port = parse_host(listen) if listen else (None, None)
                 processes = int(interface.get('PROCESSES', 1))
                 urls_obj_name = interface.get('URLS', '')
                 if urls_obj_name:
@@ -127,7 +134,8 @@ class Config(object):
                 else:
                     urls = ()
                 self._cached_values['interfaces'].append(
-                    self.Interface(name, host, port, processes, urls)
+                    self.Interface(
+                        name, host, port, unix_socket, processes, urls)
                 )
         return self._cached_values['interfaces']
 
