@@ -35,14 +35,18 @@ class DevServer(BaseCommand):
 
             server = tornado.httpserver.HTTPServer(app)
 
+            sockets = []
             if interface.port:
                 host, port = interface.host, interface.port
-                sockets = tornado.netutil.bind_sockets(port, address=host)
-                listen_on.append("{:s}:{:d}".format(host, port))
+                sockets.extend(
+                    tornado.netutil.bind_sockets(port, address=host))
+                listen_on.append(
+                    "{:s}:{:d}".format(host, port))
             if interface.unix_socket:
-                sockets = [
-                    tornado.netutil.bind_unix_socket(interface.unix_socket)]
-                listen_on.append("{:s}".format(interface.unix_socket))
+                sockets.append(
+                    tornado.netutil.bind_unix_socket(interface.unix_socket))
+                listen_on.append(
+                    "{:s}".format(interface.unix_socket))
             server.add_sockets(sockets)
 
         # Run IOLoop

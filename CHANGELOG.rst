@@ -1,3 +1,8 @@
+1.1.4
+-----
+
++ Fixed constructing list of the sockets in devserver command
+
 1.1.3
 -----
 
