@@ -1,3 +1,14 @@
+1.1.5
+-----
+
++ PEP 396 module version info
+
+Upgrade from 1.1.4
+``````````````````
+
+``version_info`` attribute is removed from ``shelter`` module, ``version``
+attribute is replaced by ``__version__``.
+
 1.1.4
 -----
 

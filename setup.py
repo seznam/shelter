@@ -5,6 +5,8 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
+from shelter import __version___ as VERSION
+
 
 class PyTest(TestCommand):
 
@@ -21,6 +23,7 @@ class PyTest(TestCommand):
         errno = pytest.main(self.pytest_args)
         sys.exit(errno)
 
+
 description = (
     "Simple Python's Tornado wrapper which provides helpers for creation"
     "a new project, writing management commands, service processes, ..."
@@ -36,7 +39,7 @@ except IOError:
 
 setup(
     name="shelter",
-    version='1.1.4',
+    version=VERSION,
     author='Jan Seifert (Seznam.cz, a.s.)',
     author_email="jan.seifert@firma.seznam.cz",
     description=description,
