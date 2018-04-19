@@ -1,6 +1,7 @@
 1.1.5
 -----
 
++ Fixed exiting of the main process when children exist and error is occurred
 + PEP 396 module version info
 
 Upgrade from 1.1.4

@@ -5,7 +5,10 @@ Modul :module:`shelter.main` is an entry point from command line into
 
 import importlib
 import itertools
+import multiprocessing
 import os
+import sys
+import traceback
 
 from gettext import gettext as _
 
@@ -133,7 +136,18 @@ def main(args=None):
     except ImproperlyConfiguredError as ex:
         parser.error(str(ex))
     command = command_cls(config)
-    command()
+    try:
+        command()
+    except Exception:
+        traceback.print_exc(file=sys.stderr)
+        sys.stderr.flush()
+        if multiprocessing.active_children():
+            # If main process has children processes, exit immediately without
+            # cleaning. It is a workaround, because parent process waits for
+            # non-daemon children.
+            os._exit(1)
+        sys.exit(1)
+    sys.exit(0)
 
 
 if __name__ == '__main__':
