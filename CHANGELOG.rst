@@ -1,3 +1,13 @@
+1.2.0.dev1
+----------
+
++ *devserver* and *shell* management commands set debug flag
+
+Upgrade from 1.1.x
+``````````````````
+
+TODO:
+
 1.1.5
 -----
 

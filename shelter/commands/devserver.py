@@ -18,10 +18,12 @@ class DevServer(BaseCommand):
 
     name = 'devserver'
     help = 'run server for local development'
-    service_processes_start = True
+    service_processes_start = False
     service_processes_in_thread = True
 
     def command(self):
+        self.context.config._debug = True
+
         # For each interface create Tornado application and start to
         # listen on the port.
         listen_on = []

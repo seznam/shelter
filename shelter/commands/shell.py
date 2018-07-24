@@ -17,6 +17,8 @@ class Shell(BaseCommand):
     service_processes_in_thread = True
 
     def command(self):
+        self.context.config._debug = True
+
         user_ns = {
             'context': self.context,
         }
