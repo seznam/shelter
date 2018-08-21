@@ -147,6 +147,13 @@ class Config(object):
         return getattr(self.settings, 'LOGGING', None)
 
     @property
+    def command_name(self):
+        """
+        Name of the current management command.
+        """
+        return self._args_parser.action
+
+    @property
     def name(self):
         """
         Application name. It's used as a process name.
