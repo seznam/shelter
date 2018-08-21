@@ -44,7 +44,6 @@ class Config(object):
         self._settings = settings
         self._args_parser = args_parser
         self._cached_values = {}
-        self._debug = False
         self.initialize()
 
     def __repr__(self):
@@ -97,14 +96,6 @@ class Config(object):
         Command line arguments as a **argparse**.
         """
         return self._args_parser
-
-    @property
-    def debug(self):
-        """
-        Indicates that server or management command is run in debug mode.
-        Flag is set by **devserver** and **shell** management commands.
-        """
-        return self._debug
 
     @property
     def context_class(self):
