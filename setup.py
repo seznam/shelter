@@ -5,7 +5,7 @@ import sys
 from setuptools import setup, find_packages
 from setuptools.command.test import test as TestCommand
 
-from shelter import __version___ as VERSION
+from shelter import __version__ as VERSION
 
 
 class PyTest(TestCommand):
