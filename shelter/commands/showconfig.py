@@ -14,7 +14,6 @@ class ShowConfig(BaseCommand):
 
     name = 'showconfig'
     help = 'show effective configuration'
-    call_initialize_child_in_main = False
 
     def command(self):
         for k, value in self.context.config.get_config_items():

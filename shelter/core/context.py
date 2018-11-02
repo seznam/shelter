@@ -18,8 +18,6 @@ class Context(object):
        constructor, it is necessary initialize them lazy!
     """
 
-    _child_initialized = False
-
     def __init__(self, config):
         self._config = config
         self.initialize()
@@ -43,10 +41,10 @@ class Context(object):
         """
         Initialize instance attributes, it is similar to :meth:`initialize`.
         However, method is called only in the children (workers of the
-        Tornado, service process) when child is initialized and before HTTP
-        server is started. *process_type* indicates type of the process,
-        it can be :data:`shelter.core.processes.SERVICE_PROCESS` or
-        :data:`shelter.core.processes.TORNADO_WORKER`. *kwargs* contains
+        Tornado, service processes) when child is initialized and before
+        HTTP server is started. *process_type* indicates type of the process,
+        it can be :data:`shelter.core.constants.SERVICE_PROCESS` or
+        :data:`shelter.core.constants.TORNADO_WORKER`. *kwargs* contains
         additional data according to *process_type*. You can override this
         method in the subclasses.
         """

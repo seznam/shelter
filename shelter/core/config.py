@@ -12,10 +12,31 @@ import six
 from shelter.core.cmdlineparser import argument
 from shelter.core.context import Context
 from shelter.utils.imports import import_object
-from shelter.utils.logging import BASE_LOGGING
 from shelter.utils.net import parse_host
 
 __all__ = ['Config', 'argument']
+
+BASE_LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'default': {
+            'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+            'datefmt': '%Y-%m-%d %H:%M:%S',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'level': 'NOTSET',
+            'formatter': 'default',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+}
 
 
 class Config(object):
@@ -163,8 +184,9 @@ class Config(object):
     @property
     def init_handler(self):
         """
-        Either function (handler) which will be run during initialization
-        of the applicationon or :const:`None` when no init handler.
+        Either name of the function or :class:`list` containing functions
+        names which will be run during initialization of the applicationon.
+        :const:`None` when no init handler.
         """
         return getattr(self.settings, 'INIT_HANDLER', None)
 

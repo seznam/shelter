@@ -3,21 +3,17 @@ Module :module:`shelter.core.commands` provides an ancestor and
 functionality for writing management commands.
 """
 
+import logging
 import signal
-import os
 import sys
 
-import six
-
 from shelter.core.cmdlineparser import argument
-from shelter.core.processes import Worker, MAIN_PROCESS
 from shelter.utils.imports import import_object
-from shelter.utils.logging import AddLoggerMeta
 
 __all__ = ['BaseCommand', 'argument']
 
 
-class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
+class BaseCommand(object):
     """
     Ancestor for management commands. Inherit this class and adjust
     *name* and *help* and optionally *arguments* attributes and override
@@ -52,8 +48,6 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
         )
     """
 
-    logger = None
-
     help = ''
     """
     Description of the management command.
@@ -64,100 +58,20 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
     Command line arguments of the management command.
     """
 
-    service_processes_start = False
-    """
-    Start service processes flag. If :const:`True`, management command
-    will start service processes.
-    """
-
-    service_processes_in_thread = True
-    """
-    Start service processes in the thread flag. If :const:`True`,
-    service processes will be started in the threads, if :const:`False`,
-    service processes will be started in the separate processes.
-    """
-
     settings_required = True
     """
     Settings module required flag. If :const:`True`, settings module
     is necessary for start the application.
     """
 
-    call_initialize_child_in_main = True
-    """
-    Initialize :class:`shelter.core.context.Context` flag. If :const:`True`,
-    call :meth:`shelter.core.context.Context.initialize_child` method when
-    child (service process, Tornado HTTP worker) is created.
-    """
-
     def __init__(self, config):
         self.context = config.context_class.from_config(config)
+        self.logger = logging.getLogger(
+            "{:s}.{:s}".format(__name__, self.__class__.__name__))
         self.stdout = sys.stdout
         self.stderr = sys.stderr
-        self.pid = os.getpid()
-        self.workers = []
+
         self.initialize()
-
-    def __call__(self):
-        config = self.context.config
-
-        # Initialize logging
-        self.context.config.configure_logging()
-
-        # Call application init handler
-        if config.init_handler:
-            init_handler = import_object(config.init_handler)
-            init_handler(self.context)
-        # Register SIGUSR1 handler
-        if config.sigusr1_handler:
-            sigusr1_handler = import_object(config.sigusr1_handler)
-
-            def sigusr1_signal_handler(dummy_signum, dummy_frame):
-                """
-                Handle SIGUSR2 signal. Call function which is defined
-                in the **settings.SIGUSR2_HANDLER** setting and forward
-                signal to all workers.
-                """
-                sigusr1_handler(self.context)
-                if (self.pid == os.getpid() and
-                        not self.service_processes_in_thread):
-                    for worker in self.workers:
-                        if worker.process:
-                            os.kill(worker.process.pid, signal.SIGUSR1)
-            signal.signal(signal.SIGUSR1, sigusr1_signal_handler)
-        else:
-            signal.signal(signal.SIGUSR1, signal.SIG_IGN)
-        # Register SIGUSR2 handler
-        if config.sigusr2_handler:
-            sigusr2_handler = import_object(config.sigusr2_handler)
-
-            def sigusr2_signal_handler(dummy_signum, dummy_frame):
-                """
-                Handle SIGUSR2 signal. Call function which is defined in
-                the **settings.SIGUSR2_HANDLER** setting.
-                """
-                sigusr2_handler(self.context)
-            signal.signal(signal.SIGUSR2, sigusr2_signal_handler)
-        else:
-            signal.signal(signal.SIGUSR2, signal.SIG_IGN)
-
-        # Start service processes
-        if self.service_processes_start:
-            self.start_service_processes()
-        # Call initialize_child() in the main process
-        if (self.call_initialize_child_in_main and
-                not self.context._child_initialized):
-            self.context._child_initialized = True
-            self.context.initialize_child(MAIN_PROCESS, command=self)
-        # Run command
-        self.command()
-        # Stop service processes
-        if not self.service_processes_in_thread:
-            for worker in self.workers:
-                worker.process.terminate()
-        else:
-            for worker in self.workers:
-                worker.stop()
 
     def initialize(self):
         """
@@ -166,40 +80,81 @@ class BaseCommand(six.with_metaclass(AddLoggerMeta, object)):
         """
         pass
 
-    def start_service_processes(self):
+    def __call__(self):
+        # Initialize logging
+        self._configure_logging()
+        # Call application init handler(s)
+        self._call_init_handlers()
+        # Register signals handlers
+        self._register_sigusr1()
+        self._register_sigusr2()
+        # Run command
+        self.command()
+
+    def _configure_logging(self):
         """
-        Run service processes defined in the **settings.SERVICE_PROCESSES**.
-        According to :attribute:`service_processes_in_thread` attribute run
-        service process either in thread, or as a new process.
+        Configure logging.
         """
-        settings = self.context.config.settings
-        service_processes = getattr(settings, 'SERVICE_PROCESSES', ())
-        separate_process = not self.service_processes_in_thread
+        self.context.config.configure_logging()
 
-        for process in service_processes:
-            process_cls = import_object(process[0])
-            process_name = process_cls.__name__
-            wait_unless_ready, timeout = process[1], process[2]
+    def _call_init_handlers(self):
+        """
+        Call init handler(s) defined in the **settings.SIGUSR1_HANDLER**
+        settings. Can be either function name or class :class:`list` of
+        the function names.
+        """
+        init_handler_setting = self.context.config.init_handler
 
-            def worker_factory(args):
+        if init_handler_setting:
+            if isinstance(init_handler_setting, str):
+                init_handlers = [init_handler_setting]
+            else:
+                init_handlers = init_handler_setting
+
+            for init_handler in init_handlers:
+                self.logger.info("Run init handler '%s'" % init_handler)
+                init_handler_obj = import_object(init_handler)
+                init_handler_obj(self.context)
+
+    def _register_sigusr1(self):
+        """
+        Register SIGUSR1 signal handler.
+        """
+        handler_name = self.context.config.sigusr1_handler
+
+        if handler_name:
+            self.logger.info("Register SIGUSR1 handler '%s'" % handler_name)
+            handler_func = import_object(handler_name)
+
+            def signal_handler(dummy_signum, dummy_frame):
                 """
-                Return instance of the worker.
+                Handle SIGUSR1 signal. Call function which is defined
+                in the **settings.SIGUSR1_HANDLER**.
                 """
-                process_cls, context, separate_process = args
-                return process_cls.get_instance(
-                    context, separate_process=separate_process
-                )
+                handler_func(self.context)
+            signal.signal(signal.SIGUSR1, signal_handler)
+        else:
+            signal.signal(signal.SIGUSR1, signal.SIG_IGN)
 
-            self.logger.info("Init management command '%s'", process_name)
+    def _register_sigusr2(self):
+        """
+        Register SIGUSR2 signal handler.
+        """
+        handler_name = self.context.config.sigusr2_handler
 
-            worker = Worker(
-                name=process_name,
-                factory=worker_factory,
-                args=(process_cls, self.context, separate_process)
-            )
-            worker.start(wait_unless_ready=wait_unless_ready, timeout=timeout)
+        if handler_name:
+            self.logger.info("Register SIGUSR2 handler '%s'" % handler_name)
+            handler_func = import_object(handler_name)
 
-            self.workers.append(worker)
+            def signal_handler(dummy_signum, dummy_frame):
+                """
+                Handle SIGUSR2 signal. Call function which is defined in
+                the **settings.SIGUSR2_HANDLER** setting.
+                """
+                handler_func(self.context)
+            signal.signal(signal.SIGUSR2, signal_handler)
+        else:
+            signal.signal(signal.SIGUSR2, signal.SIG_IGN)
 
     def command(self):
         """

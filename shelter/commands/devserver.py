@@ -2,6 +2,8 @@
 Run development server.
 """
 
+import signal
+
 import tornado.ioloop
 import tornado.netutil
 import tornado.httpserver
@@ -18,12 +20,10 @@ class DevServer(BaseCommand):
 
     name = 'devserver'
     help = 'run server for local development'
-    service_processes_start = False
-    service_processes_in_thread = True
 
     def command(self):
-        # For each interface create Tornado application and start to
-        # listen on the port.
+        # For each interface create Tornado application and start
+        # listening on the port.
         listen_on = []
         for app in get_tornado_apps(self.context, debug=True):
             interface = app.settings['interface']
@@ -58,6 +58,14 @@ class DevServer(BaseCommand):
             self.stdout.flush()
 
             try:
+                def signal_handler(dummy_signum, dummy_frame):
+                    """
+                    Handle SIGTERM signal. Stop IOLoop and exit.
+                    """
+                    tornado.ioloop.IOLoop.instance().add_callback(
+                        tornado.ioloop.IOLoop.instance().stop)
+                signal.signal(signal.SIGTERM, signal_handler)
+
                 tornado.ioloop.IOLoop.instance().start()
             except KeyboardInterrupt:
                 tornado.ioloop.IOLoop.instance().add_callback(

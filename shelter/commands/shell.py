@@ -13,8 +13,6 @@ class Shell(BaseCommand):
 
     name = 'shell'
     help = 'runs a python interactive interpreter'
-    service_processes_start = True
-    service_processes_in_thread = True
 
     def command(self):
         user_ns = {
@@ -26,3 +24,9 @@ class Shell(BaseCommand):
         except ImportError:
             import code
             code.interact(local=user_ns)
+
+    def _configure_logging(self):
+        """
+        Do not configure logging.
+        """
+        pass

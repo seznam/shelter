@@ -1,12 +1,16 @@
-1.2.0.dev1
+2.0.0.dev
 ----------
 
-+ *devserver* and *shell* management commands set debug flag
+TODO:
++ `settings.INIT_HANDLER` can be either string or list of strings
++ Service processes are started only in `runserver` command
 
 Upgrade from 1.1.x
 ``````````````````
 
 TODO:
++ `shelter.core.processes.SERVICE_PROCESS` moved to `shelter.core.constants.SERVICE_PROCESS`
++ `shelter.core.processes.TORNADO_WORKER` moved to `shelter.core.constants.TORNADO_WORKER`
 
 1.1.5
 -----

@@ -2,16 +2,14 @@
 Module :module:`shelter.core.web` provides an ancestor for HTTP handlers.
 """
 
-import six
+import logging
 
 from tornado.web import RequestHandler
-
-from shelter.utils.logging import AddLoggerMeta
 
 __all__ = ['BaseRequestHandler']
 
 
-class BaseRequestHandler(six.with_metaclass(AddLoggerMeta, RequestHandler)):
+class BaseRequestHandler(RequestHandler):
     """
     Base class for HTTP handlers, overrides
     :class:`tornado.web import RequestHandler`. Adds *logger* attribute
@@ -24,6 +22,8 @@ class BaseRequestHandler(six.with_metaclass(AddLoggerMeta, RequestHandler)):
     def initialize(self, **kwargs):
         self.context = kwargs['context']
         self.interface = kwargs['interface']
+        self.logger = logging.getLogger(
+            "{:s}.{:s}".format(__name__, self.__class__.__name__))
 
 
 class NullHandler(BaseRequestHandler):

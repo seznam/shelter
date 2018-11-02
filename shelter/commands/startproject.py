@@ -62,13 +62,11 @@ class StartProject(BaseCommand):
             help=_("author's e-mail")
         ),
     )
-    service_processes_start = False
     settings_required = False
-    call_initialize_child_in_main = False
 
     def command(self):
         substitute_map = {
-            'python': 'python3' if six.PY3 else 'python',
+            'python': 'python3' if six.PY3 else 'python2',
             'package': self.context.config.args_parser.name[0],
             'author_name': self.context.config.args_parser.author_name,
             'author_email': self.context.config.args_parser.author_email,
