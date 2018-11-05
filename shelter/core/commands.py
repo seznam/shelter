@@ -65,13 +65,14 @@ class BaseCommand(object):
     """
 
     def __init__(self, config):
+        self._sigusr1_handler_func = None
+        self._sigusr2_handler_func = None
+
         self.context = config.context_class.from_config(config)
         self.logger = logging.getLogger(
             "{:s}.{:s}".format(__name__, self.__class__.__name__))
         self.stdout = sys.stdout
         self.stderr = sys.stderr
-
-        self.initialize()
 
     def initialize(self):
         """
@@ -83,11 +84,39 @@ class BaseCommand(object):
     def __call__(self):
         # Initialize logging
         self._configure_logging()
+
         # Call application init handler(s)
-        self._call_init_handlers()
-        # Register signals handlers
-        self._register_sigusr1()
-        self._register_sigusr2()
+        init_handler_setting = self.context.config.init_handler
+        if init_handler_setting:
+            if isinstance(init_handler_setting, str):
+                init_handlers = [init_handler_setting]
+            else:
+                init_handlers = init_handler_setting
+            for init_handler in init_handlers:
+                self.logger.info("Run init handler '%s'", init_handler)
+                init_handler_obj = import_object(init_handler)
+                init_handler_obj(self.context)
+
+        # Register SIGUSR1 handler
+        handler_name = self.context.config.sigusr1_handler
+        if handler_name:
+            self.logger.info("Register SIGUSR1 handler '%s'", handler_name)
+            self._sigusr1_handler_func = import_object(handler_name)
+            signal.signal(signal.SIGUSR1, self.sigusr1_handler)
+        else:
+            signal.signal(signal.SIGUSR1, signal.SIG_IGN)
+        # Register SIGUSR2 handler
+        handler_name = self.context.config.sigusr2_handler
+        if handler_name:
+            self.logger.info("Register SIGUSR2 handler '%s'", handler_name)
+            self._sigusr2_handler_func = import_object(handler_name)
+            signal.signal(signal.SIGUSR2, self.sigusr2_handler)
+        else:
+            signal.signal(signal.SIGUSR2, signal.SIG_IGN)
+
+        # Call initialization method
+        self.initialize()
+
         # Run command
         self.command()
 
@@ -97,64 +126,21 @@ class BaseCommand(object):
         """
         self.context.config.configure_logging()
 
-    def _call_init_handlers(self):
+    def sigusr1_handler(self, unused_signum, unused_frame):
         """
-        Call init handler(s) defined in the **settings.SIGUSR1_HANDLER**
-        settings. Can be either function name or class :class:`list` of
-        the function names.
+        Handle SIGUSR1 signal. Call function which is defined in the
+        **settings.SIGUSR1_HANDLER**.
         """
-        init_handler_setting = self.context.config.init_handler
+        if self._sigusr1_handler_func is not None:
+            self._sigusr1_handler_func(self.context)
 
-        if init_handler_setting:
-            if isinstance(init_handler_setting, str):
-                init_handlers = [init_handler_setting]
-            else:
-                init_handlers = init_handler_setting
-
-            for init_handler in init_handlers:
-                self.logger.info("Run init handler '%s'", init_handler)
-                init_handler_obj = import_object(init_handler)
-                init_handler_obj(self.context)
-
-    def _register_sigusr1(self):
+    def sigusr2_handler(self, unused_signum, unused_frame):
         """
-        Register SIGUSR1 signal handler.
+        Handle SIGUSR2 signal. Call function which is defined in the
+        **settings.SIGUSR2_HANDLER**.
         """
-        handler_name = self.context.config.sigusr1_handler
-
-        if handler_name:
-            self.logger.info("Register SIGUSR1 handler '%s'" % handler_name)
-            handler_func = import_object(handler_name)
-
-            def signal_handler(dummy_signum, dummy_frame):
-                """
-                Handle SIGUSR1 signal. Call function which is defined
-                in the **settings.SIGUSR1_HANDLER**.
-                """
-                handler_func(self.context)
-            signal.signal(signal.SIGUSR1, signal_handler)
-        else:
-            signal.signal(signal.SIGUSR1, signal.SIG_IGN)
-
-    def _register_sigusr2(self):
-        """
-        Register SIGUSR2 signal handler.
-        """
-        handler_name = self.context.config.sigusr2_handler
-
-        if handler_name:
-            self.logger.info("Register SIGUSR2 handler '%s'" % handler_name)
-            handler_func = import_object(handler_name)
-
-            def signal_handler(dummy_signum, dummy_frame):
-                """
-                Handle SIGUSR2 signal. Call function which is defined in
-                the **settings.SIGUSR2_HANDLER** setting.
-                """
-                handler_func(self.context)
-            signal.signal(signal.SIGUSR2, signal_handler)
-        else:
-            signal.signal(signal.SIGUSR2, signal.SIG_IGN)
+        if self._sigusr1_handler_func is not None:
+            self._sigusr2_handler_func(self.context)
 
     def command(self):
         """
