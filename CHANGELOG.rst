@@ -4,6 +4,7 @@
 TODO:
 + `settings.INIT_HANDLER` can be either string or list of strings
 + Service processes are started only in `runserver` command
++ `Config.command_name` contains name of the current management command
 
 Upgrade from 1.1.x
 ``````````````````
@@ -11,6 +12,8 @@ Upgrade from 1.1.x
 TODO:
 + `shelter.core.processes.SERVICE_PROCESS` moved to `shelter.core.constants.SERVICE_PROCESS`
 + `shelter.core.processes.TORNADO_WORKER` moved to `shelter.core.constants.TORNADO_WORKER`
++ Majority of `shelter.core.commands.BaseCommand` control attributes are removed,
+  `settings_required` is now available.
 
 1.1.5
 -----
