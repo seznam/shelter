@@ -2,6 +2,7 @@
 ----------
 
 TODO:
++ semantic versioning
 + `settings.INIT_HANDLER` can be either string or list of strings
 + Service processes are started only in `runserver` command
 + `Config.command_name` contains name of the current management command
@@ -14,6 +15,7 @@ TODO:
 + `shelter.core.processes.TORNADO_WORKER` moved to `shelter.core.constants.TORNADO_WORKER`
 + Majority of `shelter.core.commands.BaseCommand` control attributes are removed,
   `settings_required` is now available.
++ `context` and `interface` are not passed as keywords arguments into `shelter.core.web.BaseRequestHandler`
 
 1.1.5
 -----
