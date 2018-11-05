@@ -57,8 +57,7 @@ def get_conf_files(filename):
     conf_d_path = "%s.d" % filename
     if not os.path.exists(conf_d_path):
         return [filename]
-    else:
-        return [filename] + get_conf_d_files(conf_d_path)
+    return [filename] + get_conf_d_files(conf_d_path)
 
 
 def get_configparser(filename=''):

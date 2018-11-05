@@ -112,7 +112,7 @@ class BaseCommand(object):
                 init_handlers = init_handler_setting
 
             for init_handler in init_handlers:
-                self.logger.info("Run init handler '%s'" % init_handler)
+                self.logger.info("Run init handler '%s'", init_handler)
                 init_handler_obj = import_object(init_handler)
                 init_handler_obj(self.context)
 

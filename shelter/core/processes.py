@@ -77,7 +77,7 @@ class BaseProcess(multiprocessing.Process):
             self.__class__.__name__, os.getpid())
 
         # Register SIGINT handler which will exit service process
-        def sigint_handler(dummy_signum, dummy_frame):
+        def sigint_handler(unused_signum, unused_frame):
             """
             Exit service process when SIGINT is reached.
             """

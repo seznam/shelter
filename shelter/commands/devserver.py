@@ -58,7 +58,7 @@ class DevServer(BaseCommand):
             self.stdout.flush()
 
             try:
-                def signal_handler(dummy_signum, dummy_frame):
+                def signal_handler(unused_signum, unused_frame):
                     """
                     Handle SIGTERM signal. Stop IOLoop and exit.
                     """

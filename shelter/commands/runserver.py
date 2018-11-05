@@ -23,7 +23,6 @@ from shelter.core.commands import BaseCommand
 from shelter.core.constants import TORNADO_WORKER
 from shelter.core.exceptions import ProcessError
 from shelter.utils.imports import import_object
-from Tools.scripts.finddiv import process
 
 SIGNALS_TO_NAMES_DICT = {
     getattr(signal, n): n for n in dir(signal) if
@@ -150,6 +149,7 @@ class TornadoProcess(multiprocessing.Process):
         self._tornado_app = tornado_app
 
         self.context = self._tornado_app.settings['context']
+        self.http_server = None
         self.logger = logging.getLogger(
             "{:s}.{:s}".format(__name__, self.__class__.__name__))
 
@@ -189,7 +189,7 @@ class TornadoProcess(multiprocessing.Process):
         self.context.initialize_child(TORNADO_WORKER, process=self)
 
         # Register SIGINT handler which will stop worker
-        def sigint_handler(dummy_signum, dummy_frame):
+        def sigint_handler(unused_signum, unused_frame):
             """
             Call :meth:`stop` method when SIGINT is reached.
             """

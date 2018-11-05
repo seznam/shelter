@@ -1,3 +1,7 @@
+"""
+Module :module:`shelter.core.constants` contains useful constants used
+in Shelter.
+"""
 
 __all__ = ['SERVICE_PROCESS', 'TORNADO_WORKER']
 

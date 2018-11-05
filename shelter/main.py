@@ -36,8 +36,7 @@ def get_app_settings(parser, known_args):
         args.settings or os.environ.get('SHELTER_SETTINGS_MODULE', ''))
     if not settings_module_path:
         return None
-    else:
-        return importlib.import_module(settings_module_path)
+    return importlib.import_module(settings_module_path)
 
 
 def get_management_commands(settings):
