@@ -3,236 +3,26 @@ Module :module:`shelter.core.processes` provides an ancestor and
 functionality for writing service processes.
 """
 
-import copy
 import ctypes
-import functools
 import logging
 import multiprocessing
 import os
 import signal
-import threading
 import time
 
 import setproctitle
-import six
 
-from shelter.core.exceptions import ProcessError
-from shelter.utils.logging import AddLoggerMeta
+from shelter.core.constants import SERVICE_PROCESS
 
-__all__ = ['BaseProcess', 'MAIN_PROCESS', 'SERVICE_PROCESS', 'TORNADO_WORKER']
-
-MAIN_PROCESS = 'main_process'
-"""
-Indicates that type of the process is a main process. *kwargs* argument
-in method :meth:`shelter.core.context.initialize_child` contains *command*,
-which holds instance of the management command.
-"""
-SERVICE_PROCESS = 'service_process'
-"""
-Indicates that type of the process is a service process. *kwargs* argument
-in method :meth:`shelter.core.context.initialize_child` contains *process*,
-which holds instance of the service process.
-"""
-TORNADO_WORKER = 'tornado_worker'
-"""
-Indicates that type of the process is a Tornado HTTP worker. *kwargs*
-argument in method :meth:`shelter.core.context.initialize_child` contains
-*app*, which holds Tornado's application associated with this worker and
-*http_server*, which holds instance of the ``tornado.httpserver.HTTPServer``.
-"""
-
-SIGNALS_TO_NAMES_DICT = {
-    getattr(signal, n): n for n in dir(signal) if
-    n.startswith('SIG') and '_' not in n
-}
-
-logger = logging.getLogger(__name__)
+__all__ = ['BaseProcess']
 
 
-class Worker(object):
-    """
-    Container for worker process - either service process or Tornado's
-    HTTP server process. *name* is a name of the worker, *factory* is a
-    function which returns instance of the :class:`multiprocessing.Process`
-    and *args* are arguments which are handled into *factory* function.
-    """
-
-    def __init__(self, name, factory, args):
-        self.name = name
-        self.factory = factory
-        self.args = args
-        self.process = None
-
-    if six.PY3:
-        def __bool__(self):
-            return self.is_alive
-    else:
-        def __nonzero__(self):
-            return self.is_alive
-
-    def start(self, wait_unless_ready=True, timeout=None):
-        """
-        Run the *worker*. If *wait_unless_ready* is :const:`True`,
-        wait maximum *timeout* seconds unless worker is started or
-        raise :exc:`shelter.core.exceptions.ProcessError` exception
-        if time is exceeded. If *timeout* is :const:`None`, wait
-        infinity seconds.
-        """
-        # Run process
-        if self:
-            raise ProcessError("Worker '%s' is runnig" % self.name)
-        else:
-            self.process = self.factory(self.args)
-            self.process.daemon = False
-            self.process.start()
-        # Wait unless worker is started
-        if wait_unless_ready:
-            if timeout:
-                stop_time = time.time() + timeout
-                while time.time() < stop_time and not self.process.ready:
-                    time.sleep(0.1)
-                if not self.process.ready:
-                    raise ProcessError(
-                        "Timeout during start service process '%s'" %
-                        self.name)
-            else:
-                while not self.process.ready:
-                    time.sleep(0.1)
-
-    def stop(self):
-        """
-        Stop the *worker*. If worker is not run, raise
-        :exc:`shelter.core.exceptions.ProcessError`.
-        """
-        if not self:
-            raise ProcessError("Worker '%s' is not runnig" % self.name)
-        self.process.stop()
-
-    @property
-    def pid(self):
-        """
-        Either **PID** of the worker process or :const:`None` if worker
-        has not run yet.
-        """
-        if self.process is not None:
-            return self.process.pid
-        else:
-            return None
-
-    @property
-    def exitcode(self):
-        """
-        Worker's exit code. :const:`0` when worker exited successfully,
-        positive number when exception was occurred, negative number when
-        worker was signaled and :const:`None` when worker has not exited
-        yet.
-        """
-        return self.process.exitcode
-
-    @property
-    def has_started(self):
-        """
-        :const:`True` when worker has been started, else :const:`False`.
-        """
-        return self.process is not None
-
-    @property
-    def is_alive(self):
-        """
-        :const:`True` when has not exited yet, else :const:`False`.
-        """
-        if self.process is not None:
-            return self.process.is_alive()
-        else:
-            return False
-
-
-def start_workers(workers, max_restarts=-1):
-    """
-    Start *workers* and check their status. When some worker crashes,
-    start it again. *max_restarts* is maximum amount of the restarts
-    across all workers. *workers* is a :class:`list` of the :class:`Worker`
-    instances.
-    """
-    while 1:
-        for worker in workers:
-            if not worker:
-                # When worker has not been started, start it
-                if not worker.has_started:
-                    worker.start()
-                    logger.info(
-                        "Worker '%s' has been started with pid %d",
-                        worker.name, worker.pid
-                    )
-                    continue
-                # When worker has stopped, start it again
-                exitcode = worker.exitcode
-                if exitcode != 0:
-                    # Worker has been signaled or crashed
-                    if exitcode > 0:
-                        logger.error(
-                            "Worker '%s' with pid %d died with exitcode=%r",
-                            worker.name, worker.pid, exitcode
-                        )
-                    else:
-                        logger.error(
-                            "Worker '%s' with pid %d died due to %s",
-                            worker.name, worker.pid,
-                            SIGNALS_TO_NAMES_DICT[abs(exitcode)]
-                        )
-                    # Max restarts has been reached, exit
-                    if not max_restarts:
-                        logger.fatal("Too many child restarts")
-                        break
-                    # Start worker again
-                    worker.start()
-                    # Decrement max_restarts counter
-                    if max_restarts > 0:
-                        max_restarts -= 1
-                else:
-                    # Worker has stopped without error
-                    logger.info(
-                        "Worker '%s' with pid %d has stopped",
-                        worker.name, worker.pid
-                    )
-                    # Start worker again
-                    worker.start()
-                    logger.info(
-                        "Worker '%s' has been started with pid %d",
-                        worker.name, worker.pid
-                    )
-        else:
-            time.sleep(0.1)
-            continue
-        break
-
-
-class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
+class BaseProcess(multiprocessing.Process):
     """
     Ancestor for service processes. Adjust :attribute:`interval` attribute
     and override method :meth:`loop` which is repeatedly called every
     :attribute:`interval` seconds.
-
-    .. note::
-
-        Do not create new instance using contructor, it is necessary to
-        create new instance using :meth:`get_instance` static method!
     """
-
-    lock_cls = type(
-        'DummyLock', (object,), {
-            'acquire': lambda inst, blocking, timeout: False,
-            'release': lambda inst: None
-        }
-    )
-    ready_cls = bool
-    event_cls = type(
-        'DummyEvent', (object,), {
-            'is_set': lambda inst: False,
-            'set': lambda inst: None
-        }
-    )
-    separate_process = None
 
     interval = 0
     """
@@ -241,24 +31,15 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
     """
 
     def __init__(self, context):
-        if self.separate_process is None:
-            raise ProcessError(
-                "New instance must be created using get_instance class-method")
         super(BaseProcess, self).__init__()
 
         self._parent_pid = os.getpid()
-        self._lock = self.lock_cls()
-        self._ready = self.ready_cls(False)
-        self._stop_event = self.event_cls()
+        self._ready = multiprocessing.Value(ctypes.c_bool, False)
+        self._stop_event = multiprocessing.Event()
 
-        if self.separate_process:
-            self.context = context
-            self.daemon = False
-        else:
-            self.context = copy.copy(context)
-            self.daemon = True
-        self.name = "{:s}: {:s}".format(
-            self.context.config.name, self.__class__.__name__)
+        self.context = context
+        self.logger = logging.getLogger(
+            "{:s}.{:s}".format(__name__, self.__class__.__name__))
 
         self.initialize()
 
@@ -269,99 +50,13 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
         """
         pass
 
-    @classmethod
-    def get_instance(cls, context, separate_process=True):
-        """
-        Create and return instance of the service process. According to
-        *separate_process* argument service process will be run either in
-        separated process or in thread.
-        """
-        if separate_process:
-            ancestor_cls = multiprocessing.Process
-            lock_cls = functools.partial(multiprocessing.Lock)
-            ready_cls = functools.partial(multiprocessing.Value, ctypes.c_bool)
-            event_cls = functools.partial(multiprocessing.Event)
-        else:
-            ancestor_cls = threading.Thread
-            lock_cls = functools.partial(threading.Lock)
-            ready_cls = functools.partial(ctypes.c_bool)
-            event_cls = functools.partial(threading.Event)
-
-        process_cls = type(
-            cls.__name__, (cls, ancestor_cls), {
-                '__module__': cls.__module__,
-                'lock_cls': lock_cls,
-                'ready_cls': ready_cls,
-                'event_cls': event_cls,
-                'separate_process': separate_process,
-            }
-        )
-        return process_cls(context)
-
-    def run(self):
-        """
-        Repeatedly call :meth:`loop` method every :attribute:`interval`
-        seconds. In case of *separate_process* is :const:`True` exit
-        when parent process has exited.
-        """
-        if self.separate_process:
-            setproctitle.setproctitle(self.name)
-
-            self.context.config.configure_logging()
-
-            # Register SIGINT handler which will exit service process
-            def sigint_handler(dummy_signum, dummy_frame):
-                """
-                Exit service process when SIGINT is reached.
-                """
-                self.stop()
-            signal.signal(signal.SIGINT, sigint_handler)
-
-        if not self.context._child_initialized:
-            self.context._child_initialized = True
-            self.context.initialize_child(SERVICE_PROCESS, process=self)
-
-        next_loop_time = 0
-        while 1:
-            # Exit if service process is run in separated process and pid
-            # of the parent process has changed (parent process has exited
-            # and init is new parent) or if stop flag is set.
-            if (
-                (self.separate_process and os.getppid() != self._parent_pid) or
-                self._stop_event.is_set()
-            ):
-                break
-            # Repeatedly call loop method. After first call set ready flag.
-            if time.time() >= next_loop_time:
-                self.loop()
-                if not next_loop_time and not self.ready:
-                    self._lock.acquire()
-                    try:
-                        self._ready.value = True
-                    finally:
-                        self._lock.release()
-                next_loop_time = time.time() + self.interval
-            else:
-                time.sleep(0.1)
-
-    def loop(self):
-        """
-        Repeatedly in interval :attribute:`interval` do code in this
-        method. It is abstract method, override it in subclasses.
-        """
-        raise NotImplementedError
-
     @property
     def ready(self):
         """
         :const:`True` when service process has been started successfully,
         else :const:`False`.
         """
-        self._lock.acquire()
-        try:
-            return self._ready.value
-        finally:
-            self._lock.release()
+        return self._ready.value
 
     def stop(self):
         """
@@ -369,3 +64,49 @@ class BaseProcess(six.with_metaclass(AddLoggerMeta, object)):
         :const:`True`, service process will be stopped.
         """
         self._stop_event.set()
+
+    def run(self):
+        """
+        Child process. Repeatedly call :meth:`loop` method every
+        :attribute:`interval` seconds.
+        """
+        setproctitle.setproctitle("{:s}: {:s}".format(
+            self.context.config.name, self.__class__.__name__))
+        self.logger.info(
+            "Worker '%s' has been started with pid %d",
+            self.__class__.__name__, os.getpid())
+
+        # Register SIGINT handler which will exit service process
+        def sigint_handler(dummy_signum, dummy_frame):
+            """
+            Exit service process when SIGINT is reached.
+            """
+            self.stop()
+        signal.signal(signal.SIGINT, sigint_handler)
+
+        # Initialize logging
+        self.context.config.configure_logging()
+        # Initialize child
+        self.context.initialize_child(SERVICE_PROCESS, process=self)
+
+        next_loop_time = 0
+        while 1:
+            # Exit if pid of the parent process has changed (parent process
+            # has exited and init is new parent) or if stop flag is set.
+            if os.getppid() != self._parent_pid or self._stop_event.is_set():
+                break
+            # Repeatedly call loop method. After first call set ready flag.
+            if time.time() >= next_loop_time:
+                self.loop()
+                if not next_loop_time and not self.ready:
+                    self._ready.value = True
+                next_loop_time = time.time() + self.interval
+            else:
+                time.sleep(0.25)
+
+    def loop(self):
+        """
+        Repeatedly in interval :attribute:`interval` do code in this
+        method. It is an abstract method, override it in subclasses.
+        """
+        raise NotImplementedError
