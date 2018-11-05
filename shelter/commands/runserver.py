@@ -232,7 +232,34 @@ class RunServer(BaseCommand):
     name = 'runserver'
     help = 'run server'
 
-    def _init_service_processes(self):
+    main_pid = None
+    processes = []
+
+    def initialize(self):
+        """
+        Initialize instance attributes. You can override this method in
+        the subclasses.
+        """
+        self.main_pid = os.getpid()
+        self.processes.extend(self.init_service_processes())
+        self.processes.extend(self.init_tornado_workers())
+
+    def sigusr1_handler(self, unused_signum, unused_frame):
+        """
+        Handle SIGUSR1 signal. Call function which is defined in the
+        **settings.SIGUSR1_HANDLER**. If main process, forward the
+        signal to all child processes.
+        """
+        for process in self.processes:
+            if process.pid and os.getpid() == self.main_pid:
+                try:
+                    os.kill(process.pid, signal.SIGUSR1)
+                except ProcessLookupError:
+                    pass
+        if self._sigusr1_handler_func is not None:
+            self._sigusr1_handler_func(self.context)
+
+    def init_service_processes(self):
         """
         Prepare processes defined in the **settings.SERVICE_PROCESSES**.
         Return :class:`list` of the :class:`ProcessWrapper` instances.
@@ -256,7 +283,7 @@ class RunServer(BaseCommand):
 
         return processes
 
-    def _init_tornado_workers(self):
+    def init_tornado_workers(self):
         """
         Prepare worker instances for all Tornado applications. Return
         :class:`list` of the :class:`ProcessWrapper` instances.
@@ -300,51 +327,15 @@ class RunServer(BaseCommand):
 
         return workers
 
-    def _register_sigusr1(self, processes=None):
-        """
-        Register SIGUSR1 signal handler.
-        """
-        handler_name = self.context.config.sigusr1_handler
-
-        if handler_name:
-            self.logger.info("Register SIGUSR1 handler '%s'" % handler_name)
-            handler_func = import_object(handler_name)
-
-            if processes is None:
-                def signal_handler(dummy_signum, dummy_frame):
-                    """
-                    Handle SIGUSR1 signal. Call function which is defined
-                    in the **settings.SIGUSR1_HANDLER**.
-                    """
-                    handler_func(self.context)
-            else:
-                def signal_handler(dummy_signum, dummy_frame):
-                    """
-                    Handle SIGUSR1 signal. Forward the signal to all child
-                    processes and finally call function which is defined in
-                    the **settings.SIGUSR1_HANDLER**.
-                    """
-                    for process in processes:
-                        if process.pid:
-                            try:
-                                os.kill(process.pid, signal.SIGUSR1)
-                            except ProcessLookupError:
-                                pass
-                    handler_func(self.context)
-            signal.signal(signal.SIGUSR1, signal_handler)
-        else:
-            signal.signal(signal.SIGUSR1, signal.SIG_IGN)
-
-    def start_processes(self, processes, max_restarts=-1):
+    def start_processes(self, max_restarts=-1):
         """
         Start processes and check their status. When some process crashes,
         start it again. *max_restarts* is maximum amount of the restarts
         across all processes. *processes* is a :class:`list` of the
         :class:`ProcessWrapper` instances.
         """
-        first_loop = True
         while 1:
-            for process in processes:
+            for process in self.processes:
                 if not process:
                     # When process has not been started, start it
                     if not process.has_started:
@@ -387,9 +378,6 @@ class RunServer(BaseCommand):
                             process.name, process.pid
                         )
             else:
-                if first_loop:
-                    first_loop = False
-                    self._register_sigusr1(processes)
                 time.sleep(0.25)
                 continue
             break
@@ -404,13 +392,10 @@ class RunServer(BaseCommand):
             ))
 
         # Init and start processes
-        processes = []
-        processes.extend(self._init_service_processes())
-        processes.extend(self._init_tornado_workers())
         try:
-            self.start_processes(processes, max_restarts=100)
+            self.start_processes(max_restarts=100)
         except KeyboardInterrupt:
             pass
         # Stop processes
-        for process in processes:
+        for process in self.processes:
             process.stop()
