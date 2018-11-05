@@ -3,4 +3,4 @@ good-names=i,j,k,exc,Run,_,logger
 extension-pkg-whitelist=setproctitle
 
 [MESSAGES CONTROL]
-disable=useless-object-inheritance
+disable=useless-object-inheritance,duplicate-code

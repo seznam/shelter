@@ -86,8 +86,8 @@ def main(args=None):
     # Get settings module
     try:
         settings = get_app_settings(parser, args)
-    except ImportError as ex:
-        parser.error(_("Invalid application settings module: {}").format(ex))
+    except ImportError as exc:
+        parser.error(_("Invalid application settings module: {}").format(exc))
 
     # Get management commands and add their arguments into command
     # line parser
@@ -132,8 +132,8 @@ def main(args=None):
         ))
     try:
         config = config_cls(settings, cmdline_args)
-    except ImproperlyConfiguredError as ex:
-        parser.error(str(ex))
+    except ImproperlyConfiguredError as exc:
+        parser.error(str(exc))
     command = command_cls(config)
     try:
         command()
