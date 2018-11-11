@@ -9,3 +9,4 @@
 *.log
 build
 dist
+doc/_build
