@@ -97,9 +97,14 @@ class BaseProcess(multiprocessing.Process):
                 break
             # Repeatedly call loop method. After first call set ready flag.
             if time.time() >= next_loop_time:
-                self.loop()
-                if not next_loop_time and not self.ready:
-                    self._ready.value = True
+                try:
+                    self.loop()
+                except Exception:
+                    self.logger.exception(
+                        "Worker '%s' failed", self.__class__.__name__)
+                else:
+                    if not next_loop_time and not self.ready:
+                        self._ready.value = True
                 next_loop_time = time.time() + self.interval
             else:
                 time.sleep(0.25)
