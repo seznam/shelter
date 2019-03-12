@@ -1,5 +1,5 @@
-2.0.0rc1
---------
+2.0.0
+-----
 
 + Semantic versioning
 + `settings.INIT_HANDLER` can be either string or list of strings
@@ -11,14 +11,14 @@
 Upgrade from 1.1.x
 ``````````````````
 
-+ `shelter.core.processes.SERVICE_PROCESS` moved to
-  `shelter.core.constants.SERVICE_PROCESS`
-+ `shelter.core.processes.TORNADO_WORKER` moved to
-  `shelter.core.constants.TORNADO_WORKER`
++ Constants `shelter.core.processes.SERVICE_PROCESS` and
+  `shelter.core.processes.TORNADO_WORKER` are moved to
+  `shelter.core.constants`.
++ `Context.initialize_child` keywords arguments are changed.
 + Majority of `shelter.core.commands.BaseCommand` control attributes are
-  removed, only `settings_required` is now available
+  removed, only `settings_required` is now available.
 + `context` and `interface` are not passed as keywords arguments into
-  `shelter.core.web.BaseRequestHandler`
+  `shelter.core.web.BaseRequestHandler` constructor.
 
 1.1.5
 -----
