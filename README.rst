@@ -56,22 +56,24 @@ application is a script **manage.py**.
 `settings.py` is included in the new skeleton. See comments in file how to
 define interfaces, management commands, service processes, ...
 
-Management commands which provides Shelter library:
+List of the management commands which provides Shelter library:
 
-+ **devserver** runs development HTTP server, which autoreloads application
-  when source files are changes. Server is run only in one process, service
-  processes are run in threads.
 + **runserver** runs production HTTP, multi-process server. Number of the
   processes are detected according to ``INTERFACES`` setting in the
   ``settings`` module. Service processes are run in separated processes.
-  Parent process checks child processes and when child process exits (itself
-  or due to crash or signal), it is run again. Crashes are counted, maximum
-  amount of the crashes are 100, then whole application will exit. If child
-  stops with exit code 0, crash counter is not incremented.
+  Parent process checks child processes and when child process exits (due to
+  crash or signal), it is run again. Crashes are counted, maximum amount of
+  the crashes are 100, after it whole application will be exited. If child
+  stops with exit code 0, crash counter is not incremented, so you can exit
+  the worker deliberately and it will be run again.
++ **devserver** runs development HTTP server, which autoreloads application
+  when source files are changes. Server is run only in one process.
 + **shell** runs interactive Python's shell. First it tries to run *IPython*,
-  then standard *Python* shell. Service processes are run in threads.
+  then standard *Python* shell.
 + **showconfig** shows effective configuration.
 + **startproject** will generate new apllication skeleton.
+
+Pay attention, service processes are run only in **runserver** command!
 
 Config class
 ------------
@@ -143,10 +145,9 @@ Context class
 -------------
 
 In all handlers, management commands and service processes is available
-instance of the ``shelter.core.context.Context`` which holds data and
-classes instance for your appllication. Bundled class ``Context`` contains
-only one property **config** with ``Config`` instance (see previous
-chapter).
+instance of the ``shelter.core.context.Context`` which holds resources for
+your appllication. Bundled class ``Context`` contains only one property
+**config** with ``Config`` instance (see previous chapter).
 
 You can define own class in ``settings`` module::
 
@@ -155,7 +156,7 @@ You can define own class in ``settings`` module::
 Overrided ``Context`` can contain additional *properties*, e.g. database
 connection pool.
 
-**It is necesary to initialize shared sources (sockets, open files, ...)
+**It is necesary to initialize shared resources (sockets, open files, ...)
 lazy!** The reason is that subprocesses (Tornado HTTP workers, service
 processes) have to get uninitialized ``Context``, because forked resources
 can cause a lot of nights without dreams... **Also it is necessary to known
@@ -173,17 +174,14 @@ shared among processes.
 ``initialize_child()`` is called when service processes or Tornado workers
 are initialized. So it is the best place where you can safely initialize
 shared resources like a database connection. *process_type* argument contains
-type of the child – **shelter.core.processes.MAIN_PROCESS**,
-**SERVICE_PROCESS** or **TORNADO_WORKER**. *kwargs* contains additional data
+type of the child – **shelter.core.constants.SERVICE_PROCESS** or
+**shelter.core.constants.TORNADO_WORKER**. *kwargs* contains additional data
 according to *process_type*:
 
-+ for **MAIN_PROCESS** contains *command* key with instance of the
-  management command.
-+ for **SERVICE_PROCESS** contains *process* key with instance of the
++ for **SERVICE_PROCESS** contains *process* key which is instance of the
   service process.
-+ for **TORNADO_WORKER** contains *app* key with instance of the
-  ``tornado.web.Application`` and *http_server* key with instance of
-  the ``tornado.httpserver.HTTPServer``.
++ for **TORNADO_WORKER** contains *process* key which is instance of the
+  HTTP worker.
 
 ::
 
@@ -222,6 +220,13 @@ is launched and on **SIGUSR1** and **SIGUSR2** signals.
     INIT_HANDLER = 'myapp.core.app.init_handler'
     SIGUSR1_HANDLER = 'myapp.core.app.sigusr1_handler'
     SIGUSR2_HANDLER = 'myapp.core.app.sigusr2_handler'
+
+``INIT_HANDLER`` is allowed to contain multiple values.
+
+::
+
+    INIT_HANDLER = [
+        'myapp.core.app.init_handler1', 'myapp.core.app.init_handler2']
 
 Handler is common *Python's* function which takes only one argument
 *context* with ``Context`` instance (see previous chapter).
@@ -321,27 +326,19 @@ method and/or ``initialize()`` method.
             self.output_file.write(data)
             self.output_file.flush()
 
-+ **name** is a name of the management command. This name you type into
-  command line, e.g. ``./manage.py export``.
++ **name** is a name of the management command. This name is used from command
+  line, e.g. ``./manage.py export``.
 + **help** is a short description of the management command. This help is
   printed onto console when you type ``./manage.py command -h``.
 + **arguments** are arguments of the command line parser. ``argument()``
   function has the same meaning as ``ArgumentParser.add_argument()``
   from *Python's standard library*.
-+ **service_processes_start** If it is ``True``, service processes will be
-  launched on background. Default is do not launch any service processes.
-  **It is not public API, do not use this attribute unless you really know
-  what you are doing**!
-+ **service_processes_in_thread** If it is ``True``, launch service
-  processes in threads, else as a separated processes. **It is not public
-  API, do not use this attribute unless you really know what you are doing**!
-+ **settings_required** If it is ``True``, `settings` module will not be
-  required. **It is not public API, do not use this attribute unless you
++ **settings_required** If it is ``False``, `settings` module will not be
+  required for command. However, only internal ``shelter.core.config.Config``
+  and ``shelter.core.context.Context`` will be available, not your own defined
+  in settings. For example, internal **startprocest** command sets this flag
+  to ``False``. **It is not public API, do not use this attribute unless you
   really know what you are doing**!
-+ **call_initialize_child_in_main** If it is ``True``,
-  call *shelter.core.context.Context.initialize_child* method when child
-  (service process, Tornado HTTP worker) is created. **It is not public API,
-  do not use this attribute unless you really know what you are doing**!
 
 Management command has to be registered in the ``settings`` module.
 
