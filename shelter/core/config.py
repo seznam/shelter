@@ -205,3 +205,13 @@ class Config(object):
         :const:`None` when no signal handler.
         """
         return getattr(self.settings, 'SIGUSR2_HANDLER', None)
+
+    @property
+    def app_settings_handler(self):
+        """
+        Either function which will be called when instance of the Tornado
+        application is created or :const:`None` when no handler.. Return
+        :class:`dict` which is passed as *\*\*settings* argument into
+        ``tornado.web.Application`` constructor.
+        """
+        return getattr(self.settings, 'APP_SETTINGS_HANDLER', None)

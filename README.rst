@@ -213,10 +213,12 @@ Hooks
 -----
 
 You can define several hooks in the ``settings`` module - when application
-is launched and on **SIGUSR1** and **SIGUSR2** signals.
+is launched, on **SIGUSR1** and **SIGUSR2** signals and when instance of the
+Tornado application is created.
 
 ::
 
+    APP_SETTINGS_HANDLER = 'myapp.core.app.get_app_settings'
     INIT_HANDLER = 'myapp.core.app.init_handler'
     SIGUSR1_HANDLER = 'myapp.core.app.sigusr1_handler'
     SIGUSR2_HANDLER = 'myapp.core.app.sigusr2_handler'
@@ -243,6 +245,10 @@ Handler is common *Python's* function which takes only one argument
   receives main/parent process, signal is propagated into all workers.
 + **SIGUSR2_HANDLER** is called on **SIGUSR2** signal. Signal is processed
   only in process which received signal. It is not propagated anywhere.
++ **APP_SETTINGS_HANDLER** is called on when instance of the Tornado
+  application is created. Function have to return *dict*, which is passed as
+  *\*\*settings* argument into ``tornado.web.Application`` constructor. Do not
+  pass *debug*, *context* and *interface* keys.
 
 Service processes
 -----------------

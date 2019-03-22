@@ -1,24 +1,29 @@
+2.1.0
+-----
+
++ Added ``app_settings_handler`` hook.
+
 2.0.0
 -----
 
 + Semantic versioning
-+ `settings.INIT_HANDLER` can be either string or list of strings
++ ``settings.INIT_HANDLER`` can be either string or list of strings
 + Service processes are started only in `runserver` command
-+ `Config.command_name` contains name of the current management command
++ ``Config.command_name`` contains name of the current management command
 + Clean code, fixes
 + Sphinx documentation
 
 Upgrade from 1.1.x
 ``````````````````
 
-+ Constants `shelter.core.processes.SERVICE_PROCESS` and
-  `shelter.core.processes.TORNADO_WORKER` are moved to
-  `shelter.core.constants`.
-+ `Context.initialize_child` keywords arguments are changed.
-+ Majority of `shelter.core.commands.BaseCommand` control attributes are
-  removed, only `settings_required` is now available.
-+ `context` and `interface` are not passed as keywords arguments into
-  `shelter.core.web.BaseRequestHandler` constructor.
++ Constants ``shelter.core.processes.SERVICE_PROCESS`` and
+  ``shelter.core.processes.TORNADO_WORKER`` are moved to
+  ``shelter.core.constants``.
++ ``Context.initialize_child`` keywords arguments are changed.
++ Majority of ``shelter.core.commands.BaseCommand`` control attributes are
+  removed, only ``settings_required`` is now available.
++ ``context`` and ``interface`` are not passed as keywords arguments into
+  ``shelter.core.web.BaseRequestHandler`` constructor.
 
 1.1.5
 -----

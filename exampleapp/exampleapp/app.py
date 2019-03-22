@@ -22,3 +22,9 @@ def sigusr2_handler(context):
         "'%s' app sigusr2 handler, pid %d",
         context.config.name, os.getpid()
     )
+
+
+def app_settings_handler(context):
+    return {
+        'cookie_secret': context.config.secret_key,
+    }

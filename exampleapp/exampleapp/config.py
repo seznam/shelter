@@ -3,4 +3,7 @@ from shelter.contrib.config.iniconfig import IniConfig
 
 
 class Config(IniConfig):
-    pass
+
+    @property
+    def secret_key(self):
+        return self.settings.SECRET_KEY
