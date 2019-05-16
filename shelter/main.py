@@ -68,6 +68,17 @@ def get_config_class(settings):
     return config_cls
 
 
+def sys_exit(exitcode=None):
+    """
+    Exit from Python with exit code *exitcode*. If main process has children
+    processes, exit immediately without cleaning. It is a workaround, because
+    parent process waits for non-daemon children.
+    """
+    if multiprocessing.active_children():
+        os._exit(exitcode)
+    sys.exit(exitcode)
+
+
 def main(args=None):
     """
     Run management command handled from command line.
@@ -140,13 +151,8 @@ def main(args=None):
     except Exception:
         traceback.print_exc(file=sys.stderr)
         sys.stderr.flush()
-        if multiprocessing.active_children():
-            # If main process has children processes, exit immediately without
-            # cleaning. It is a workaround, because parent process waits for
-            # non-daemon children.
-            os._exit(1)
-        sys.exit(1)
-    sys.exit(0)
+        sys_exit(1)
+    sys_exit(0)
 
 
 if __name__ == '__main__':

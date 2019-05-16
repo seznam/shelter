@@ -21,7 +21,7 @@ import tornado.process
 from shelter.core.app import get_tornado_apps
 from shelter.core.commands import BaseCommand
 from shelter.core.constants import TORNADO_WORKER
-from shelter.core.exceptions import ProcessError
+from shelter.core.exceptions import ProcessError, CommandError
 from shelter.utils.imports import import_object
 
 SIGNALS_TO_NAMES_DICT = {
@@ -358,8 +358,9 @@ class RunServer(BaseCommand):
                             )
                         # Max restarts has been reached, exit
                         if not max_restarts:
-                            self.logger.fatal("Too many child restarts")
-                            break
+                            msg = "Too many child restarts"
+                            self.logger.fatal(msg)
+                            raise CommandError(msg)
                         # Start process again
                         process.start()
                         # Decrement max_restarts counter
@@ -391,11 +392,15 @@ class RunServer(BaseCommand):
                 self.context.config.name, " ".join(sys.argv)
             ))
 
-        # Init and start processes
         try:
+            # Init and start processes
             self.start_processes(max_restarts=100)
         except KeyboardInterrupt:
             pass
-        # Stop processes
-        for process in self.processes:
-            process.stop()
+        finally:
+            # Stop processes
+            for process in self.processes:
+                self.logger.info(
+                    "Stopping proces '%s' with pid %d",
+                    process.name, process.pid)
+                process.stop()

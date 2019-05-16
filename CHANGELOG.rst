@@ -1,3 +1,8 @@
+2.1.1
+-----
+
++ Fixed main process exiting.
+
 2.1.0
 -----
 
