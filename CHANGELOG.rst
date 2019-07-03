@@ -1,3 +1,8 @@
+2.1.2
+-----
+
++ Fixed stopping processes in runserver command.
+
 2.1.1
 -----
 

@@ -400,7 +400,8 @@ class RunServer(BaseCommand):
         finally:
             # Stop processes
             for process in self.processes:
-                self.logger.info(
-                    "Stopping proces '%s' with pid %d",
-                    process.name, process.pid)
-                process.stop()
+                if process.has_started:
+                    self.logger.info(
+                        "Stopping proces '%s' with pid %d",
+                        process.name, process.pid)
+                    process.stop()
