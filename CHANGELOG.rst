@@ -1,3 +1,8 @@
+2.2.0
+-----
+
++ Added ``APP_CLASS`` option into ``settings.INTERFACES``.
+
 2.1.2
 -----
 

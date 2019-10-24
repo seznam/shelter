@@ -4,4 +4,4 @@ a new project, writing management commands, service processes, ...
 """
 
 
-__version__ = '2.1.2'
+__version__ = '2.2.0'

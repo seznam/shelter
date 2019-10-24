@@ -8,6 +8,7 @@ import logging.config
 import sys
 
 import six
+import tornado.web
 
 from shelter.core.cmdlineparser import argument
 from shelter.core.context import Context
@@ -49,8 +50,9 @@ class Config(object):
     """
 
     Interface = collections.namedtuple(
-        'Interface',
-        ['name', 'host', 'port', 'unix_socket', 'processes', 'urls']
+        'Interface', [
+            'name', 'host', 'port', 'unix_socket',
+            'processes', 'urls', 'app_cls']
     )
     """
     Container which encapsulates arguments of the interface.
@@ -154,10 +156,14 @@ class Config(object):
                     urls = import_object(urls_obj_name)
                 else:
                     urls = ()
-                self._cached_values['interfaces'].append(
-                    self.Interface(
-                        name, host, port, unix_socket, processes, urls)
-                )
+                app_cls_name = interface.get('APP_CLASS', '')
+                if app_cls_name:
+                    app_cls = import_object(app_cls_name)
+                else:
+                    app_cls = tornado.web.Application
+                interface = self.Interface(
+                    name, host, port, unix_socket, processes, urls, app_cls)
+                self._cached_values['interfaces'].append(interface)
         return self._cached_values['interfaces']
 
     @property

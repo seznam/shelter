@@ -32,7 +32,7 @@ def get_tornado_apps(context, debug=False):
         if not urls:
             urls = [tornado.web.URLSpec('/', NullHandler)]
         apps.append(
-            tornado.web.Application(
+            interface.app_cls(
                 urls, debug=debug, context=context,
                 interface=interface, **settings
             )

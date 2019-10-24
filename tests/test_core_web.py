@@ -21,7 +21,7 @@ def test_null_handler():
     app = tornado.web.Application(
         [], context=object(), interface=Config.Interface(
             name='foo', host='', port=1, unix_socket=None,
-            processes=0, urls=[]
+            processes=0, urls=[], app_cls=tornado.web.Application
         )
     )
     req = mock.Mock()

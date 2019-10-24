@@ -380,6 +380,11 @@ defined in ``settings`` module. Interfaces can be set as either TCP/IP sockets
             # Path in format 'path.to.module.variable_name' where
             # urls patterns are defined
             'URLS': 'myapp.urls.default_urls',
+
+            # Path in format 'path.to.module.variable_name' to class
+            # of the Tornado's application. If not specified, default
+            # tornado.web.Application is used. 
+            'APP_CLASS': 'myapp.core.app.TornadoApplication',
         },
     }
 
@@ -478,6 +483,7 @@ configuration file overrides previous defined value.
     Listen=:4444
     Processes=8
     Urls=tests.urls1.urls_http
+    AppClass=myapp.core.app.TornadoApplication
 
     [formatters]
     keys=default

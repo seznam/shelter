@@ -2,10 +2,13 @@
 import importlib
 
 import pytest
+import tornado.web
 
 from shelter.core.cmdlineparser import ArgumentParser
 from shelter.core.config import Config
 from shelter.core.context import Context
+
+import tests.test_core_app
 
 
 class ContextTest(Context):
@@ -44,23 +47,35 @@ def test_config_interfaces():
 
     interfaces = sorted(config.interfaces, key=lambda x: x.name)
 
-    assert len(interfaces) == 3
+    assert len(interfaces) == 4
 
     assert interfaces[0].name == 'fastrpc'
     assert interfaces[0].host == '192.168.1.0'
     assert interfaces[0].port == 4445
+    assert interfaces[0].unix_socket is None
+    assert interfaces[0].app_cls is tornado.web.Application
     assert len(interfaces[0].urls) == 0
 
     assert interfaces[1].name == 'http'
     assert interfaces[1].host == ''
     assert interfaces[1].port == 4443
+    assert interfaces[1].unix_socket is None
+    assert interfaces[1].app_cls is tornado.web.Application
     assert len(interfaces[1].urls) == 2
 
-    assert interfaces[2].name == 'unix'
-    assert interfaces[2].host is None
-    assert interfaces[2].port is None
-    assert interfaces[2].unix_socket == '/tmp/tornado.socket'
-    assert len(interfaces[2].urls) == 3
+    assert interfaces[2].name == 'rest'
+    assert interfaces[2].host == ''
+    assert interfaces[2].port == 4447
+    assert interfaces[2].unix_socket is None
+    assert interfaces[2].app_cls is tests.test_core_app.ApplicationTest
+    assert len(interfaces[2].urls) == 0
+
+    assert interfaces[3].name == 'unix'
+    assert interfaces[3].host is None
+    assert interfaces[3].port is None
+    assert interfaces[3].unix_socket == '/tmp/tornado.socket'
+    assert interfaces[3].app_cls is tests.test_core_app.ApplicationTest
+    assert len(interfaces[3].urls) == 3
 
 
 def test_config_interfaces_both_tcp_and_unix():

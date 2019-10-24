@@ -6,6 +6,7 @@ from shelter.core.cmdlineparser import ArgumentParser
 
 import pytest
 import mock
+import tornado.web
 
 from six.moves import configparser
 
@@ -15,8 +16,14 @@ from shelter.contrib.config.iniconfig import (
 from shelter.core.exceptions import ImproperlyConfiguredError
 from shelter.core.context import Context
 
+import tests.test_core_app
+
 
 class ContextTest(Context):
+    pass
+
+
+class ApplicationTest(tornado.web.Application):
     pass
 
 
@@ -100,7 +107,7 @@ def test_get_configparser_config_does_not_exist(test_conf_dir):
 
 @mock.patch('shelter.contrib.config.iniconfig.logger')
 @mock.patch(
-    'shelter.contrib.config.iniconfig.get_conf_d_files', new=lambda x: ['abc'])
+    'shelter.contrib.config.iniconfig.get_conf_d_files', new=lambda _: ['abc'])
 def test_get_configparser_warn(m, test_conf_dir):
     conf_filename = os.path.join(test_conf_dir, 'example.conf')
     parser = get_configparser(conf_filename)
@@ -122,25 +129,35 @@ def test_config_interfaces(test_conf_dir):
 
     interfaces = sorted(config.interfaces, key=lambda x: x.name)
 
-    assert len(interfaces) == 3
+    assert len(interfaces) == 4
 
     assert interfaces[0].name == 'fastrpc'
     assert interfaces[0].host == '192.168.1.0'
     assert interfaces[0].port == 4445
     assert interfaces[0].unix_socket is None
+    assert interfaces[0].app_cls is tornado.web.Application
     assert len(interfaces[0].urls) == 0
 
     assert interfaces[1].name == 'http'
     assert interfaces[1].host == ''
     assert interfaces[1].port == 4444
     assert interfaces[1].unix_socket is None
+    assert interfaces[1].app_cls is tornado.web.Application
     assert len(interfaces[1].urls) == 2
 
-    assert interfaces[2].name == 'unix'
-    assert interfaces[2].host is None
-    assert interfaces[2].port is None
-    assert interfaces[2].unix_socket == '/tmp/tornadoini.socket'
-    assert len(interfaces[2].urls) == 3
+    assert interfaces[2].name == 'rest'
+    assert interfaces[2].host == ''
+    assert interfaces[2].port == 4447
+    assert interfaces[2].unix_socket is None
+    assert interfaces[2].app_cls is tests.test_core_app.ApplicationTest
+    assert len(interfaces[2].urls) == 0
+
+    assert interfaces[3].name == 'unix'
+    assert interfaces[3].host is None
+    assert interfaces[3].port is None
+    assert interfaces[3].unix_socket == '/tmp/tornadoini.socket'
+    assert interfaces[3].app_cls is ApplicationTest
+    assert len(interfaces[3].urls) == 3
 
 
 def test_config_interfaces_both_tcp_and_unix(test_conf_dir):

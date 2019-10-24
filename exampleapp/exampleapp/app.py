@@ -2,8 +2,14 @@
 import logging
 import os
 
+import tornado.web
 
 logger = logging.getLogger(__name__)
+
+
+class Application(tornado.web.Application):
+
+    pass
 
 
 def init_handler(context):

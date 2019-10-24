@@ -10,6 +10,7 @@ import os.path
 from gettext import gettext as _
 
 import six.moves
+import tornado.web
 
 from shelter.core.exceptions import ImproperlyConfiguredError
 from shelter.core.config import Config, argument
@@ -175,9 +176,19 @@ class IniConfig(Config):
                     urls = import_object(urls_obj_name)
                 else:
                     urls = ()
+                # Application class
+                try:
+                    app_obj_name = self.config_parser.get(
+                        interface_name, 'AppClass')
+                except CONFIGPARSER_EXC:
+                    app_obj_name = interface.get('APP_CLASS', '')
+                if app_obj_name:
+                    app_cls = import_object(app_obj_name)
+                else:
+                    app_cls = tornado.web.Application
 
-                self._cached_values['interfaces'].append(
-                    self.Interface(
-                        name, host, port, unix_socket, processes, urls)
-                )
+                interface = self.Interface(
+                    name, host, port, unix_socket, processes, urls, app_cls)
+                self._cached_values['interfaces'].append(interface)
+
         return self._cached_values['interfaces']

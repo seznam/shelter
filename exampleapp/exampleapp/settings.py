@@ -29,6 +29,7 @@ INTERFACES = {
         'LISTEN': ':8000',
         'PROCESSES': 2,
         'URLS': 'exampleapp.urls.urls_default',
+        'APP_CLASS': 'exampleapp.app.Application',
     },
     'debug': {
         'LISTEN': ':8001',
