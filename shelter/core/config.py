@@ -215,3 +215,12 @@ class Config(object):
         ``tornado.web.Application`` constructor.
         """
         return getattr(self.settings, 'APP_SETTINGS_HANDLER', None)
+
+    @property
+    def tornado_app_class(self):
+        """
+        Either subclass of :class:`tornado.web.Application` which should be
+        used for initializing server or :const:`None`, then vanilla
+        application class will be used.
+        """
+        return getattr(self.settings, 'TORNADO_APP_CLASS', None)

@@ -11,6 +11,16 @@ from shelter.utils.imports import import_object
 __all__ = ['get_tornado_apps']
 
 
+def get_app_class(context):
+    """
+    Import and eturn tornado app class specified in settings or return vanilla
+    one (:class:`tornado.web.Application`).
+    """
+    if context.config.tornado_app_class is not None:
+        return import_object(context.config.tornado_app_class)
+    return tornado.web.Application
+
+
 def get_tornado_apps(context, debug=False):
     """
     Create Tornado's application for all interfaces which are defined
@@ -26,13 +36,15 @@ def get_tornado_apps(context, debug=False):
     else:
         settings = {}
 
+    app_class = get_app_class(context)
+
     apps = []
     for interface in context.config.interfaces:
         urls = interface.urls
         if not urls:
             urls = [tornado.web.URLSpec('/', NullHandler)]
         apps.append(
-            tornado.web.Application(
+            app_class(
                 urls, debug=debug, context=context,
                 interface=interface, **settings
             )
