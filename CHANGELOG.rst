@@ -1,3 +1,8 @@
+2.3.0
+-----
+
++ Added ``check_exit`` method on ``shelter.core.processes.BaseProcess``.
+
 2.2.0
 -----
 

@@ -58,6 +58,17 @@ class BaseProcess(multiprocessing.Process):
         """
         return self._ready.value
 
+    def check_exit(self):
+        """
+        Return :const:`True` if process should exit, else :const:`False`.
+        Process should exit if pid of the parent process has changed
+        (parent process has exited and init is new parent) or if stop
+        flag is set.
+        """
+        if os.getppid() != self._parent_pid or self._stop_event.is_set():
+            return True
+        return False
+
     def stop(self):
         """
         Set stop flag. :meth:`run` method checks this flag and if it is
@@ -91,9 +102,7 @@ class BaseProcess(multiprocessing.Process):
 
         next_loop_time = 0
         while 1:
-            # Exit if pid of the parent process has changed (parent process
-            # has exited and init is new parent) or if stop flag is set.
-            if os.getppid() != self._parent_pid or self._stop_event.is_set():
+            if self.check_exit():
                 break
             # Repeatedly call loop method. After first call set ready flag.
             if time.time() >= next_loop_time:
