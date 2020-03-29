@@ -1,6 +1,6 @@
 """
-Module :module:`shelter.core.context` provides base class which
-encapsulates data for HTTP handlers.
+Module :mod:`shelter.core.context` provides base class which encapsulates
+data for HTTP handlers.
 """
 
 __all__ = ['Context']

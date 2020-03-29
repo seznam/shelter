@@ -21,7 +21,7 @@ from shelter import __version__ as SHELTER_VERSION
 # -- Project information -----------------------------------------------------
 
 project = 'Shelter'
-copyright = '2019 – 2018, Seznam.cz, a.s.'
+copyright = '2016 – 2020, Seznam.cz, a.s.'
 author = 'Jan Seifert'
 
 # The short X.Y version
@@ -79,7 +79,7 @@ pygments_style = None
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'bizstyle'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -101,7 +101,6 @@ html_static_path = ['_static']
 # 'searchbox.html']``.
 #
 # html_sidebars = {}
-
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -183,4 +182,7 @@ epub_exclude_files = ['search.html']
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+    'tornado': ('https://www.tornadoweb.org/en/stable/', None),
+}

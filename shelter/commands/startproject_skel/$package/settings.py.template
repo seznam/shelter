@@ -3,14 +3,18 @@
 # Name of the application, this name will be shown in the process list.
 # NAME = '$package'
 
-# Function, which will be run during initialization of the application.
+# Function, which is called when application is initialized.
 # INIT_HANDLER = '$package.app.init_handler'
 
-# Function, which will be run on SIGUSR1. Function will be called in the
-# main process and in the all workers.
+# Function, which is called when Tornado applications is initialized.
+# APP_SETTINGS_HANDLER = '$package.app.app_settings_handler'
+
+# Function, which is called when SIGUSR1 is received. Function is called
+# in the main process and in all workers and service processes.
 # SIGUSR1_HANDLER = '$package.app.sigusr1_handler'
 
-# Function, which will be run on SIGUSR2.
+# Function, which is called when SIGUSR2 is received. Function is called
+# only in process which received signal.
 # SIGUSR2_HANDLER = '$package.app.sigusr2_handler'
 
 # Application configuration class name.

@@ -12,7 +12,7 @@ def argument(*args, **kwargs):
     """
     Return function's arguments how single command line argument
     should be parsed. *args* a *kwargs* have the same meaning as a
-    :method:`argparse.ArgumentParser.add_argument` method.
+    :meth:`argparse.ArgumentParser.add_argument` method.
     """
     return args, kwargs
 

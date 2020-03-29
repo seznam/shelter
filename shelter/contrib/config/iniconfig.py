@@ -92,7 +92,7 @@ class IniConfig(Config):
 
     First, main configuration file is read. Then all configuration files
     from `file.conf.d` subdirectory are read in alphabetical order. E.g.
-    if `-f conf/myapp.conf` is handled, first `conf/myapp.conf` file is
+    if `-f conf/myapp.conf` is passed, first `conf/myapp.conf` file is
     read and then all `conf/myapp.conf.d/*.conf` files. Value in later
     configuration file overrides previous defined value.
     """

@@ -1,5 +1,5 @@
 """
-Module :module:`shelter.core.commands` provides an ancestor and
+Module :mod:`shelter.core.commands` provides an ancestor and
 functionality for writing management commands.
 """
 

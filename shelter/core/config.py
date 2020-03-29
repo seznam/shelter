@@ -1,6 +1,75 @@
 """
-Module :module:`shelter.core.config` provides base class which
-encapsulates configuration.
+Shelter provides base functionality for configuration. Configuration
+options can be read either from configuration file or from command line
+arguments.
+
+Class :class:`shelter.Config` is an container which holds configuration.
+Constructor takes two arguments, *settings* and *args_parser*.
+
+
+
+
+Public attributes are **settings** which
+is ``settings`` module of the application and **args_parser** which is
+instance of the ``argparse.ArgumentParser`` from *Python's standard library*.
+
+You can override this class in the `settings` module::
+
+    CONFIG_CLASS = 'myapp.core.config.AppConfig'
+
+Your own `AppConfig` class can contain additional *properties* with
+application's settings, e.g. database connection arguments. Way how the value
+is found is only on you - either only in **settings** or **args_parser** or
+in both. You can define additional arguments of the command line.
+
+::
+
+    import time
+
+    from shelter.core.config import Config, argument
+
+    class AppConfig(Config):
+
+        arguments = (
+            argument(
+                '-k', '--secret-key',
+                dest='secret_key', action='store',
+                type=str, default='',
+                help='configuration file'
+            ),
+        )
+
+        Database = collections.namedtuple('Database', ['host', 'db'])
+
+        def initialize(self):
+            # initialize() is called after instance is created. If you want
+            # add some instance attributes, use this method instead of
+            # override __init__().
+            self._server_started_time = time.time()
+
+        def get_config_items(self):
+            # Override get_config_items() method if you want to add
+            # your options into showconfig management command.
+            base_items = super(AppConfig, self).get_config_items()
+            app_items = (
+                ('secret_key', self.secret_key),
+                ('database', self.database),
+            )
+            return base_items + app_items
+
+        @property
+        def secret_key(self):
+            # If command-line argument -k/--secret-key exists, it will
+            # override settings.SECRET_KEY value.
+            return self.args_parser.secret_key or self.settings.SECRET_KEY
+
+        @property
+        def database(self):
+            return self.Database(
+                db=self.settings.DATABASE_NAME,
+                host=self.settings.DATABASE_HOST,
+                passwd=getattr(self.settings, DATABASE_PASSWORD, '')
+            )
 """
 
 import collections
@@ -217,7 +286,7 @@ class Config(object):
         """
         Either function which will be called when instance of the Tornado
         application is created or :const:`None` when no handler.. Return
-        :class:`dict` which is passed as *\*\*settings* argument into
+        :class:`dict` which is passed as `**settings` argument into
         ``tornado.web.Application`` constructor.
         """
         return getattr(self.settings, 'APP_SETTINGS_HANDLER', None)

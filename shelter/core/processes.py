@@ -1,5 +1,5 @@
 """
-Module :module:`shelter.core.processes` provides an ancestor and
+Module :mod:`shelter.core.processes` provides an ancestor and
 functionality for writing service processes.
 """
 
@@ -19,9 +19,9 @@ __all__ = ['BaseProcess']
 
 class BaseProcess(multiprocessing.Process):
     """
-    Ancestor for service processes. Adjust :attribute:`interval` attribute
+    Ancestor for service processes. Adjust :attr:`interval` attribute
     and override method :meth:`loop` which is repeatedly called every
-    :attribute:`interval` seconds.
+    :attr:`interval` seconds.
     """
 
     interval = 0

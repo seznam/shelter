@@ -22,8 +22,8 @@ After instalation **shelter-admin** command is available. For help type:
 
 The most important argument is ``-s/--settings``, which joins Shelter library
 and your application. Format is Python's module path, eg. `myapp.settings`.
-Second option how to handle `settings` module is ``SHELTER_SETTINGS_MODULE``
-environment variable. If both are handled, command line argument has higher
+Second option how to pass `settings` module is ``SHELTER_SETTINGS_MODULE``
+environment variable. If both are passed, command line argument has higher
 priority than environment variable.
 
 ::
@@ -404,7 +404,7 @@ It is the same as in *Python's Tornado* application.
         URLSpec(r'/about/', AboutHandler),
     )
 
-Tuple/list **urls_default** is handled into relevant interface in the
+Tuple/list **urls_default** is passed into relevant interface in the
 ``settings`` module, see previous chapter.
 
 HTTP handler is a subclass of the ``shelter.core.web.BaseRequestHandler``
@@ -470,7 +470,7 @@ Configuration file is specified either by ``SHELTER_CONFIG_FILENAME``
 environment variable or ``-f/--config-file`` command line argument. First,
 main configuration file is read. Then all configuration files from
 ``file.conf.d`` subdirectory are read in alphabetical order. E.g. if
-``-f conf/myapp.conf`` is handled, first ``conf/myapp.conf`` file is read
+``-f conf/myapp.conf`` is passed, first ``conf/myapp.conf`` file is read
 and then all ``conf/myapp.conf.d/*.conf`` files. Value in later
 configuration file overrides previous defined value.
 

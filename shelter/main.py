@@ -81,7 +81,7 @@ def sys_exit(exitcode=None):
 
 def main(args=None):
     """
-    Run management command handled from command line.
+    Run management command passed from command line.
     """
     # Base command line parser. Help is not allowed because command
     # line is parsed in two stages - in the first stage is found setting

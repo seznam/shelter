@@ -35,7 +35,7 @@ class ProcessWrapper(object):
     Container for process, provides API for controlling processes.
     *process_cls* is class of the process, either service process
     or Tornado's HTTP server process. *args* are arguments which
-    are handled into process constructor. If *wait_unless_ready* is
+    are passed into process constructor. If *wait_unless_ready* is
     :data:`True`, wait maximum *timeout* seconds unless process is
     started, otherwise raise :exc:`shelter.core.exceptions.ProcessError`
     exception if time is exceeded. If *timeout* is :data:`None`,
