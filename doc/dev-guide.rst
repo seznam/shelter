@@ -2,18 +2,21 @@
 Developers guide
 ================
 
+.. py:module:: settings
+
 ``settings`` – basic configuration of your application
 ------------------------------------------------------
 
-Basic configuration of your application is placed in ``settings`` module.
-It is common Python module, which is passed into Shelter using either
-``-s/--settings`` command line argument or ``SHELTER_SETTINGS_MODULE``
-environment variable. It contains a few options for basic application
-settings. ``startproject`` management command creates two entry points,
-``applicationname/manage.py`` script and ``manage-applicationname``
-executable. Both have pre-configured settings module to
-``applicationname.settings``, so you needn't explicitly specify
-``settings`` module if you use these entry points.
+Basic configuration of your application is placed in :mod:`!settings`
+module. It is common Python module, which is passed into Shelter using
+either :option:`-s/--settings` command line argument or
+:envvar:`SHELTER_SETTINGS_MODULE` environment variable. It contains a few
+options for basic application settings. :option:`startproject` management
+command creates two entry points, :command:`applicationname/manage.py`
+script and :command:`manage-applicationname` executable. Both have
+pre-configured settings module to :mod:`!applicationname.settings`, so you
+needn't explicitly specify :mod:`!settings` module if you use these entry
+points.
 
 .. code-block:: sh
 
@@ -65,11 +68,11 @@ Default: ``None``
 
 Hook, which is called when instance of the :class:`~tornado.web.Application`
 is created. Target function receives only one argument, instance of the
-:class:`~shelter.core.context.Context` and returns ``dict`` with
-additional arguments, which are passed into ``Application`` constructor as
-a keywords arguments (note that there is *settings* argument in
-``Application`` constructor, but it is not Shelter settings, it is only same
-name).
+:class:`~shelter.core.context.Context` and returns :class:`!dict` with
+additional arguments, which are passed into :class:`~!tornado.web.Application`
+constructor as a keywords arguments (note that there is *settings* argument
+in :class:`~!tornado.web.Application` constructor, but it is not Shelter
+:mod:`settings`, it is only same name).
 
 .. code-block:: python
 
@@ -110,7 +113,7 @@ Default: ``'shelter.core.config.Config'``
 
 Application configuration class. Shelter provides default
 :class:`~shelter.core.config.Config` class, which converts basic options
-from ``settings`` module to instance attributes.
+from :mod:`settings` module to instance attributes.
 
 .. code-block:: python
 
@@ -132,13 +135,14 @@ resources, e.g. database connection. Shelter provides default
 MANAGEMENT_COMMANDS
 """""""""""""""""""
 
-Default: ``()`` (empty tuple)
+Default: ``()`` (empty :class:`!tuple`)
 
 List of management commands. Management command is one-time task,
 :class:`~shelter.core.commands.BaseCommand` descendant. It is launched
-from command line, obtains context of your application and can do anything,
-e.g. dump database data. If you type ``./manage --help`` in console,
-commands are printed in help messages.
+from command line, obtains instance of the
+:class:`~shelter.core.context.Context` of your application and can do
+anything, e.g. dump database data. If you type ``./manage --help`` in
+console, commands are printed in help messages.
 
 .. code-block:: python
 
@@ -149,18 +153,19 @@ commands are printed in help messages.
 SERVICE_PROCESSES
 """""""""""""""""
 
-Default: ``()`` (empty tuple)
+Default: ``()`` (empty :class:`!tuple`)
 
 List of service processes definition. Service process is tasks, which is
 launched in separated process and it is are periodically called in adjusted
 interval. It is :class:`~shelter.core.processes.BaseProcess` descendant.
-It is started only if ``runserver`` command is run, obtains context of your
-application and can do anything while server is alive, e.g. periodically
-pre-caches data from database into memory. Each item is a tuple
+It is started only if :option:`runserver` command is run, obtains instance
+of the :class:`~shelter.core.context.Context` of your application and can
+do anything while server is alive, e.g. periodically pre-caches data from
+database into memory. Each item is a tuple
 ``('path.to.Class', wait_unless_ready, timeout)``. *path.to.Class* is service
-process class. *wait_unless_ready* is ``bool``, if ``True``, main process
-will wait maximum *timeout* seconds until process is successfully started.
-If ``False``, set *timeout* to ``0`` or ``None``.
+process class. *wait_unless_ready* is :class:`!bool`, if :data:`!True`, main
+process will wait maximum *timeout* seconds until process is successfully
+started. If :data:`!False`, set *timeout* to :data:`!0` or :data:`!None`.
 
 .. code-block:: python
 
@@ -174,8 +179,8 @@ INTERFACES
 Default: no default value, required option
 
 HTTP server interfaces. Your application can listen to multiple ports and
-each port can handles different urls. You can specify only either ``LISTEN``
-or ``UNIX_SOCKET`` option, or both together.
+each port can handles different urls. You can specify either :data:`LISTEN`
+or :data:`UNIX_SOCKET` option, or both together.
 
 .. code-block:: python
 
@@ -205,6 +210,8 @@ or ``UNIX_SOCKET`` option, or both together.
 ---------------------------------------------------------
 
 .. automodule:: shelter.core.config
+
+.. autofunction:: shelter.core.config.argument
 
 .. autoclass:: shelter.core.config.Config
 

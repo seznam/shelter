@@ -186,3 +186,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'tornado': ('https://www.tornadoweb.org/en/stable/', None),
 }
+
+suppress_warnings = [
+    'ref.option',
+]

@@ -10,9 +10,15 @@ from gettext import gettext as _
 
 def argument(*args, **kwargs):
     """
-    Return function's arguments how single command line argument
-    should be parsed. *args* a *kwargs* have the same meaning as a
-    :meth:`argparse.ArgumentParser.add_argument` method.
+    Return tuple containig all positional arguments as :class:`!tuple`
+    and all named arguments as :class:`!dict`. *args* and *kwargs* have
+    the same meaning as a :meth:`ArgumentParser.add_argument
+    <argparse.ArgumentParser.add_argument>` method.
+
+    .. code-block:: python
+
+        >>> argument('-f', '--file', action='store', type=str, default='')
+        (('-f', '--file'), {action: 'store', type: str, default: ''})
     """
     return args, kwargs
 

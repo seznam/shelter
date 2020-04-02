@@ -1,6 +1,6 @@
 
-Shelter documentation
-=====================
+Shelter
+=======
 
 Introduction
 ------------

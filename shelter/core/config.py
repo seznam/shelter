@@ -1,75 +1,79 @@
 """
 Shelter provides base functionality for configuration. Configuration
-options can be read either from configuration file or from command line
-arguments.
+options can be read either from :mod:`settings` or from command line
+arguments. During start Shelter creates instance of the :class:`Config`
+class. It is container which holds configuration. Constructor takes two
+arguments, *settings* and *args_parser*. You can override and customize
+this class in your application. It is possible to add additional command
+line arguments or options from :mod:`settings`.
 
-Class :class:`shelter.Config` is an container which holds configuration.
-Constructor takes two arguments, *settings* and *args_parser*.
+Consider customized ``Config`` class:
+
+.. code-block:: python
+
+    import collections
+    import os
+
+    from shelter.core import config
+
+    DatabaseConfig = collections.namedtuple(
+        'Database', ['db', 'host', 'port', 'user', 'password'])
+
+    STR2BOOL = {'0': False, 'false': False, '1': True, 'true': True}
 
 
-
-
-Public attributes are **settings** which
-is ``settings`` module of the application and **args_parser** which is
-instance of the ``argparse.ArgumentParser`` from *Python's standard library*.
-
-You can override this class in the `settings` module::
-
-    CONFIG_CLASS = 'myapp.core.config.AppConfig'
-
-Your own `AppConfig` class can contain additional *properties* with
-application's settings, e.g. database connection arguments. Way how the value
-is found is only on you - either only in **settings** or **args_parser** or
-in both. You can define additional arguments of the command line.
-
-::
-
-    import time
-
-    from shelter.core.config import Config, argument
-
-    class AppConfig(Config):
+    class Config(config.Config):
 
         arguments = (
-            argument(
-                '-k', '--secret-key',
-                dest='secret_key', action='store',
-                type=str, default='',
-                help='configuration file'
-            ),
+            config.argument(
+                '-d', '--log-debug', action='store_true',
+                help='log debug messages'),
         )
 
-        Database = collections.namedtuple('Database', ['host', 'db'])
-
         def initialize(self):
-            # initialize() is called after instance is created. If you want
-            # add some instance attributes, use this method instead of
-            # override __init__().
-            self._server_started_time = time.time()
+            # Obtain value for log_debug flag. If MYAPP_LOG_DEBUG environment
+            # variable is set, obtain value from environment variable. If not
+            # and --log-debug command line argument is passed, set log_debug
+            # to True, otherwise set log_debug to False.
+            log_debug = os.environ.get('MYAPP_LOG_DEBUG')
+            if log_debug is not None:
+                if log_debug not in STR2BOOL:
+                    raise ValueError(
+                        "Invalid log_debug value '{}'".format(log_debug))
+                self._log_debug = STR2BOOL[log_debug.lower()]
+            else:
+                self._log_debug = self.args_parser.log_debug
 
         def get_config_items(self):
-            # Override get_config_items() method if you want to add
-            # your options into showconfig management command.
-            base_items = super(AppConfig, self).get_config_items()
+            # Override get_config_items() method if you want to add your
+            # options into showconfig management command.
+            base_items = super(Config, self).get_config_items()
             app_items = (
-                ('secret_key', self.secret_key),
+                ('log_debug', self.log_debug),
                 ('database', self.database),
             )
             return base_items + app_items
 
         @property
-        def secret_key(self):
-            # If command-line argument -k/--secret-key exists, it will
-            # override settings.SECRET_KEY value.
-            return self.args_parser.secret_key or self.settings.SECRET_KEY
+        def log_debug(self):
+            return self._log_debug
 
         @property
         def database(self):
-            return self.Database(
-                db=self.settings.DATABASE_NAME,
-                host=self.settings.DATABASE_HOST,
-                passwd=getattr(self.settings, DATABASE_PASSWORD, '')
+            return DatabaseConfig(
+                db=self.settings.DATABASE['db'],
+                host=self.settings.DATABASE['host'],
+                port=self.settings.DATABASE['port'],
+                user=self.settings.DATABASE['user'],
+                password=self.settings.DATABASE.get('password'),
             )
+
+Class adds additional command line argument :option:`-d/--log-debug`,
+whose value can be set in command line, or via :envvar:`MYAPP_LOG_DEBUG`
+environment variable. If both are present, environment variable has
+higher priority. Final value is accesible as :attr:`config.log_debug`
+property. Class also adds database configuration as :attr:`config.database`
+property.
 """
 
 import collections
@@ -79,12 +83,14 @@ import sys
 import six
 import tornado.web
 
-from shelter.core.cmdlineparser import argument
+from shelter.core import cmdlineparser
 from shelter.core.context import Context
 from shelter.utils.imports import import_object
 from shelter.utils.net import parse_host
 
 __all__ = ['Config', 'argument']
+
+argument = cmdlineparser.argument
 
 BASE_LOGGING = {
     'version': 1,
