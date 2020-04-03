@@ -214,6 +214,8 @@ or :data:`UNIX_SOCKET` option, or both together.
 .. autofunction:: shelter.core.config.argument
 
 .. autoclass:: shelter.core.config.Config
+   :member-order: bysource
+   :members: arguments, initialize, settings, args_parser, get_config_items
 
 ``shelter.core.context`` – container for shared resources
 ---------------------------------------------------------

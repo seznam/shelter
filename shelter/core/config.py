@@ -5,7 +5,7 @@ arguments. During start Shelter creates instance of the :class:`Config`
 class. It is container which holds configuration. Constructor takes two
 arguments, *settings* and *args_parser*. You can override and customize
 this class in your application. It is possible to add additional command
-line arguments or options from :mod:`settings`.
+line arguments or options from :mod:`settings` module.
 
 Consider customized ``Config`` class:
 
@@ -47,12 +47,11 @@ Consider customized ``Config`` class:
         def get_config_items(self):
             # Override get_config_items() method if you want to add your
             # options into showconfig management command.
-            base_items = super(Config, self).get_config_items()
-            app_items = (
+            app_options = (
                 ('log_debug', self.log_debug),
                 ('database', self.database),
             )
-            return base_items + app_items
+            return super(Config, self).get_config_items() + app_options
 
         @property
         def log_debug(self):
@@ -73,7 +72,8 @@ whose value can be set in command line, or via :envvar:`MYAPP_LOG_DEBUG`
 environment variable. If both are present, environment variable has
 higher priority. Final value is accesible as :attr:`config.log_debug`
 property. Class also adds database configuration as :attr:`config.database`
-property.
+property. For better performance, consider using :obj:`cached_property`
+instead of :obj:`!property`.
 """
 
 import collections
@@ -117,11 +117,11 @@ BASE_LOGGING = {
 
 class Config(object):
     """
-    Class which encapsulates configuration. It joins options from
-    settings module and command line arguments. *settings* is a Python's
-    module defined by either **SHELTER_SETTINGS_MODULE** environment
-    variable or **-s/--settings** command line argument and *args_parser*
-    is a :class:`argparse.Namespace` instance.
+    Class which encapsulates configuration. The class joins options from
+    :mod:`settings` module and command line arguments. *settings* is a
+    Python module defined by either :envvar:`SHELTER_SETTINGS_MODULE`
+    environment variable or :option:`-s/--settings` command line argument.
+    *args_parser* is instance of :class:`argparse.Namespace`.
     """
 
     Interface = collections.namedtuple(
@@ -135,7 +135,15 @@ class Config(object):
 
     arguments = ()
     """
-    Command line arguments of the Config class.
+    User defined command line arguments. Arguments are defined by
+    :func:`argument` function. For argument's details see :mod:`argparse`
+    module documentation.
+
+    .. code-block:: python
+
+        arguments = (
+            argument('-d', action='store_true', help='log debug messages'),
+        )
     """
 
     def __init__(self, settings, args_parser):
@@ -151,10 +159,31 @@ class Config(object):
 
     def initialize(self):
         """
-        Initialize instance attributes. You can override this method in
-        the subclasses.
+        Initialize instance attributes. You can override this method
+        in the subclasses. If you want to add some instance attributes,
+        do not override :meth:`__init__` constructor, but define these
+        attributes inside this method.
+
+        .. code-block:: python
+
+            def initialize(self):
+                self.some_attribute = self.context.some_value
         """
         pass
+
+    @property
+    def settings(self):
+        """
+        :mod:`settings` module of the application.
+        """
+        return self._settings
+
+    @property
+    def args_parser(self):
+        """
+        Command line arguments as instance of :class:`argparse.Namespace`.
+        """
+        return self._args_parser
 
     def configure_logging(self):
         """
@@ -164,11 +193,20 @@ class Config(object):
 
     def get_config_items(self):
         """
-        Return current configuration as a :class:`tuple` with
-        option-value pairs.
+        Return current configuration as a :class:`!tuple` with
+        option-value pairs. Management command :option:`showconfig`
+        shows effective configuration of your application. If you
+        override :class:`Config` class and you want to show your own
+        configuration options, it is necessary to register these
+        options.
 
-        ::
-            (('option1', value1), ('option2', value2))
+        .. code-block:: python
+
+            def get_config_items(self):
+                app_options = (
+                    ('database', self.database),
+                )
+                return super(Config, self).get_config_items() + app_options
         """
         return (
             ('settings', self.settings),
@@ -180,20 +218,6 @@ class Config(object):
             ('sigusr1_handler', self.sigusr1_handler),
             ('sigusr2_handler', self.sigusr2_handler),
         )
-
-    @property
-    def settings(self):
-        """
-        Settings module of the application.
-        """
-        return self._settings
-
-    @property
-    def args_parser(self):
-        """
-        Command line arguments as a **argparse**.
-        """
-        return self._args_parser
 
     @property
     def context_class(self):
