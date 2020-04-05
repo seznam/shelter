@@ -55,11 +55,18 @@ Default: ``None``
 Hook, which is called when application is initialized. It is called from
 main process when application is launched. Target function receives only
 one argument, instance of the :class:`~shelter.core.context.Context`,
-returns nothing.
+returns nothing. Multiple hooks can be placed in :class:`!tuple`.
 
 .. code-block:: python
 
+    # Only one init handler
     INIT_HANDLER = 'myapplicaton.hooks.init_handler'
+
+    # Multiple init handlers
+    INIT_HANDLER = (
+        'myapplicaton.hooks.clear_filesystem_cache',
+        'myapplicaton.hooks.push_start_app_metrics',
+    )
 
 APP_SETTINGS_HANDLER
 """"""""""""""""""""
@@ -206,6 +213,38 @@ or :data:`UNIX_SOCKET` option, or both together.
         },
     }
 
+LOGGING
+"""""""
+
+Default: root logger which logs to console:
+
+.. code-block:: python
+
+    {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'default': {
+                'format': '%(asctime)s %(name)s %(levelname)s %(message)s',
+                'datefmt': '%Y-%m-%d %H:%M:%S',
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'level': 'NOTSET',
+                'formatter': 'default',
+            },
+        },
+        'root': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    }
+
+Takes the logging configuration from a dictionary. See :mod:`logging.config`
+module and :func:`logging.config.dictConfig` function documentation.
+
 ``shelter.core.config`` – application configuration class
 ---------------------------------------------------------
 
@@ -215,7 +254,8 @@ or :data:`UNIX_SOCKET` option, or both together.
 
 .. autoclass:: shelter.core.config.Config
    :member-order: bysource
-   :members: arguments, initialize, settings, args_parser, get_config_items
+   :members: arguments, initialize, settings, args_parser, get_config_items,
+             name, init_handler
 
 ``shelter.core.context`` – container for shared resources
 ---------------------------------------------------------

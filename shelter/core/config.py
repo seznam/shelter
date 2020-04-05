@@ -220,6 +220,13 @@ class Config(object):
         )
 
     @property
+    def name(self):
+        """
+        Application name. This name will be shown in the OS process list.
+        """
+        return getattr(self.settings, 'NAME', sys.argv[0])
+
+    @property
     def context_class(self):
         """
         Context as a :class:`shelter.core.context.Context` class or subclass.
@@ -280,18 +287,12 @@ class Config(object):
         return self._args_parser.action
 
     @property
-    def name(self):
-        """
-        Application name. It's used as a process name.
-        """
-        return getattr(self.settings, 'NAME', sys.argv[0])
-
-    @property
     def init_handler(self):
         """
-        Either name of the function or :class:`list` containing functions
-        names which will be run during initialization of the applicationon.
-        :const:`None` when no init handler.
+        Hook, which is called when application is initialized. Can
+        be :class:`!str` if only one hook is passed, or :class:`!tuple`
+        containig several :class:`!str` if multiple hooks, or
+        :data:`!None` if no init handler.
         """
         return getattr(self.settings, 'INIT_HANDLER', None)
 
