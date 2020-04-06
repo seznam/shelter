@@ -39,6 +39,8 @@ List of basic settings
 NAME
 """"
 
+.. py:module:: settings.NAME
+
 Default: name of the executable
 
 Name of the application. This name will be shown in the OS process list.
@@ -49,6 +51,8 @@ Name of the application. This name will be shown in the OS process list.
 
 INIT_HANDLER
 """"""""""""
+
+.. py:module:: settings.INIT_HANDLER
 
 Default: ``None``
 
@@ -71,6 +75,8 @@ returns nothing. Multiple hooks can be placed in :class:`!tuple`.
 APP_SETTINGS_HANDLER
 """"""""""""""""""""
 
+.. py:module:: settings.APP_SETTINGS_HANDLER
+
 Default: ``None``
 
 Hook, which is called when instance of the :class:`~tornado.web.Application`
@@ -88,10 +94,12 @@ in :class:`~!tornado.web.Application` constructor, but it is not Shelter
 SIGUSR1_HANDLER
 """""""""""""""
 
+.. py:module:: settings.SIGUSR1_HANDLER
+
 Default: ``None``
 
-Hook, which is called when when ``SIGUSR1`` signal is received. Target
-function receives only one argument, instance of the
+Hook, which is called when when :const:`~!signal.SIGUSR1` signal is
+received. Target function receives only one argument, instance of the
 :class:`~shelter.core.context.Context`, returns nothing. Function is
 called in the main process and in all workers and service processes.
 
@@ -102,10 +110,12 @@ called in the main process and in all workers and service processes.
 SIGUSR2_HANDLER
 """""""""""""""
 
+.. py:module:: settings.SIGUSR2_HANDLER
+
 Default: ``None``
 
-Hook, which is called when when ``SIGUSR2`` signal is received. Target
-function receives only one argument, instance of the
+Hook, which is called when when :const:`~!signal.SIGUSR2` signal is
+received. Target function receives only one argument, instance of the
 :class:`~shelter.core.context.Context`, returns nothing. Function is
 called only in process which received signal.
 
@@ -115,6 +125,8 @@ called only in process which received signal.
 
 CONFIG_CLASS
 """"""""""""
+
+.. py:module:: settings.CONFIG_CLASS
 
 Default: ``'shelter.core.config.Config'``
 
@@ -129,6 +141,8 @@ from :mod:`settings` module to instance attributes.
 CONTEXT_CLASS
 """""""""""""
 
+.. py:module:: settings.CONTEXT_CLASS
+
 Default: ``'shelter.core.context.Context'``
 
 Application context class. Context is a container for shared
@@ -141,6 +155,8 @@ resources, e.g. database connection. Shelter provides default
 
 MANAGEMENT_COMMANDS
 """""""""""""""""""
+
+.. py:module:: settings.MANAGEMENT_COMMANDS
 
 Default: ``()`` (empty :class:`!tuple`)
 
@@ -159,6 +175,8 @@ console, commands are printed in help messages.
 
 SERVICE_PROCESSES
 """""""""""""""""
+
+.. py:module:: settings.SERVICE_PROCESSES
 
 Default: ``()`` (empty :class:`!tuple`)
 
@@ -182,6 +200,8 @@ started. If :data:`!False`, set *timeout* to :data:`!0` or :data:`!None`.
 
 INTERFACES
 """"""""""
+
+.. py:module:: settings.INTERFACES
 
 Default: no default value, required option
 
@@ -215,6 +235,8 @@ or :data:`UNIX_SOCKET` option, or both together.
 
 LOGGING
 """""""
+
+.. py:module:: settings.LOGGING
 
 Default: root logger which logs to console:
 
@@ -254,8 +276,20 @@ module and :func:`logging.config.dictConfig` function documentation.
 
 .. autoclass:: shelter.core.config.Config
    :member-order: bysource
-   :members: arguments, initialize, settings, args_parser, get_config_items,
-             name, init_handler
+   :members: arguments,
+             initialize,
+             settings,
+             args_parser,
+             get_config_items,
+             name,
+             init_handler,
+             app_settings_handler,
+             sigusr1_handler,
+             sigusr2_handler,
+             context_class,
+             interfaces,
+             logging,
+             command_name
 
 ``shelter.core.context`` – container for shared resources
 ---------------------------------------------------------

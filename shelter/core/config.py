@@ -223,13 +223,51 @@ class Config(object):
     def name(self):
         """
         Application name. This name will be shown in the OS process list.
+        Value is obtained from :attr:`settings.NAME` option.
         """
         return getattr(self.settings, 'NAME', sys.argv[0])
 
     @property
+    def init_handler(self):
+        """
+        Name of the hook, which is called when application is initialized.
+        Value is obtained from :attr:`settings.INIT_HANDLER` option.
+        """
+        return getattr(self.settings, 'INIT_HANDLER', None)
+
+    @property
+    def app_settings_handler(self):
+        """
+        Name of the hook, which is called when *kwargs* for
+        :class:`~tornado.web.Application` constructor is requested.
+        Value is obtained from :attr:`settings.APP_SETTINGS_HANDLER`
+        option.
+        """
+        return getattr(self.settings, 'APP_SETTINGS_HANDLER', None)
+
+    @property
+    def sigusr1_handler(self):
+        """
+        Name of the hook, which is called when :const:`~!signal.SIGUSR1` is
+        received. Value is obtained from :attr:`settings.SIGUSR1_HANDLER`
+        option.
+        """
+        return getattr(self.settings, 'SIGUSR1_HANDLER', None)
+
+    @property
+    def sigusr2_handler(self):
+        """
+        Name of the hook, which is called when :const:`~!signal.SIGUSR2` is
+        received. Value is obtained from :attr:`settings.SIGUSR2_HANDLER`
+        option.
+        """
+        return getattr(self.settings, 'SIGUSR2_HANDLER', None)
+
+    @property
     def context_class(self):
         """
-        Context as a :class:`shelter.core.context.Context` class or subclass.
+        :class:`~shelter.core.context.Context` class. Value is obtained
+        from :attr:`settings.CONTEXT_CLASS` option.
         """
         if 'context_class' not in self._cached_values:
             context_cls_name = getattr(self.settings, 'CONTEXT_CLASS', '')
@@ -243,8 +281,9 @@ class Config(object):
     @property
     def interfaces(self):
         """
-        Interfaces as a :class:`list`of the
+        Interfaces as a :class:`!list` of
         :class:`shelter.core.config.Config.Interface` instances.
+        Value is obtained from :attr:`settings.INTERFACES` option.
         """
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
@@ -275,49 +314,18 @@ class Config(object):
     @property
     def logging(self):
         """
-        *Python's logging* configuration or :const:`None`.
+        Configuration of Python logging, see :mod:`logging.config`
+        module and :func:`logging.config.dictConfig` function
+        documentation. Value is obtained from :attr:`settings.LOGGING`
+        option.
         """
         return getattr(self.settings, 'LOGGING', None)
 
     @property
     def command_name(self):
         """
-        Name of the current management command.
+        Name of the current running management command. Value is obtained
+        command line. For example, if ``./manage.py devserver`` is being
+        run, value will be ``"devserver"``.
         """
         return self._args_parser.action
-
-    @property
-    def init_handler(self):
-        """
-        Hook, which is called when application is initialized. Can
-        be :class:`!str` if only one hook is passed, or :class:`!tuple`
-        containig several :class:`!str` if multiple hooks, or
-        :data:`!None` if no init handler.
-        """
-        return getattr(self.settings, 'INIT_HANDLER', None)
-
-    @property
-    def sigusr1_handler(self):
-        """
-        Either function (handler) which will be run on SIGUSR1 or
-        :const:`None` when no signal handler.
-        """
-        return getattr(self.settings, 'SIGUSR1_HANDLER', None)
-
-    @property
-    def sigusr2_handler(self):
-        """
-        Either function (handler) which will be run on SIGUSR2 or
-        :const:`None` when no signal handler.
-        """
-        return getattr(self.settings, 'SIGUSR2_HANDLER', None)
-
-    @property
-    def app_settings_handler(self):
-        """
-        Either function which will be called when instance of the Tornado
-        application is created or :const:`None` when no handler.. Return
-        :class:`dict` which is passed as `**settings` argument into
-        ``tornado.web.Application`` constructor.
-        """
-        return getattr(self.settings, 'APP_SETTINGS_HANDLER', None)
