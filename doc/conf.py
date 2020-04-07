@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages',
+    # 'sphinx.ext.githubpages',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -113,11 +113,11 @@ htmlhelp_basename = 'Shelterdoc'
 latex_elements = {
     # The paper size ('letterpaper' or 'a4paper').
     #
-    # 'papersize': 'letterpaper',
+    'papersize': 'a4paper',
 
     # The font size ('10pt', '11pt' or '12pt').
     #
-    # 'pointsize': '10pt',
+    'pointsize': '11pt',
 
     # Additional stuff for the LaTeX preamble.
     #
@@ -126,6 +126,8 @@ latex_elements = {
     # Latex figure (float) alignment
     #
     # 'figure_align': 'htbp',
+
+    'extraclassoptions': 'openany,oneside'
 }
 
 # Grouping the document tree into LaTeX files. List of tuples
@@ -135,7 +137,6 @@ latex_documents = [
     (master_doc, 'Shelter.tex', 'Shelter Documentation',
      'Jan Seifert', 'manual'),
 ]
-
 
 # -- Options for manual page output ------------------------------------------
 

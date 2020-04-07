@@ -16,7 +16,7 @@ Goal
 When you write a new application a lot of thing is the same and boring.
 You must write configuration parser, Tornado application class, runner, …,
 see `Hello World <https://www.tornadoweb.org/en/stable/#hello-world>`_
-example. Shelter tries to solve this boring things. Why the name is Shelter?
+example. Shelter tries solving this boring things. Why the name is Shelter?
 Tornado is an element, so Shelter tries to save you against the element :-).
 
 Main features
