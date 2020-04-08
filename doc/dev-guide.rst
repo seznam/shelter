@@ -2,10 +2,10 @@
 Developers guide
 ================
 
-.. py:module:: settings
-
 ``settings`` – basic configuration of your application
 ------------------------------------------------------
+
+.. py:module:: settings
 
 Basic configuration of your application is placed in :mod:`!settings`
 module. It is common Python module, which is passed into Shelter using
@@ -206,7 +206,7 @@ INTERFACES
 Default: no default value, required option
 
 HTTP server interfaces. Your application can listen to multiple ports and
-each port can handles different urls. You can specify either :data:`LISTEN`
+each port can handle different urls. You can specify either :data:`LISTEN`
 or :data:`UNIX_SOCKET` option, or both together.
 
 .. code-block:: python

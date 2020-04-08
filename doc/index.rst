@@ -5,37 +5,40 @@ Shelter
 Introduction
 ------------
 
+Goal
+""""
+
 Shelter is a `Python Tornado <https://www.tornadoweb.org/en/stable/>`_
 wrapper. It provides classes and helpers for creation new application
 skeleton, writing management commands, service processes and request
-handlers. Both Python 2.7 and Python 3.4 or higher are supported.
-
-Goal
-----
+handlers.
 
 When you write a new application a lot of thing is the same and boring.
-You must write configuration parser, Tornado application class, runner, …,
-see `Hello World <https://www.tornadoweb.org/en/stable/#hello-world>`_
-example. Shelter tries solving this boring things. Why the name is Shelter?
-Tornado is an element, so Shelter tries to save you against the element :-).
+You must write configuration parser, Tornado application class, runner, …
+See `Hello World <https://www.tornadoweb.org/en/stable/#hello-world>`_
+example. Shelter tries solving this boring things.
+
+Why the name is Shelter? Tornado is an element, so Shelter tries to save
+you against the element :-).
 
 Main features
--------------
+"""""""""""""
 
-- Ancestor for class which holds configuration – ``Config`` class.
-- Ancestor for ``Context`` class – container for shared resources, e.g.
-  database connection. Context instance is accessible in all HTTP handlers
-  and hooks/functions.
+- Ancestor for class which holds configuration.
+- Ancestor for container for shared resources, e.g. database connection.
+  Instance of this class is accessible in all HTTP handlers and hooks.
 - Hooks – functions, which are called when some events are appeared, e.g.
   when server is launched or some signals are received.
 - Service processes – tasks, which are launched in separated process and
   they are periodically called in adjusted interval.
 - Management commands – one-time tasks, which are launched from command
-  line. Several commands are included in library, e.g. ``devserver`` for
-  running HTTP server in development mode or ``runserver`` for production.
+  line. Several commands are included in library, e.g. :option:`devserver`
+  for running HTTP server in development mode or :option:`runserver` for
+  production.
 - Multiple ports, where HTTP server listen to and multiple related Tornado's
   application for them.
 - Only one entry point for url → HTTP handler routing.
+- Both Python 2.7 and Python 3.4 or higher are supported.
 
 Instalation and quick start
 ---------------------------
@@ -54,8 +57,8 @@ Installation from PyPi:
 
     pip install shelter
 
-After instalation ``shelter-admin`` command is available. For help type
-``shelter-admin -h``:
+After instalation :command:`shelter-admin` command is available. For help
+type ``shelter-admin -h``:
 
 .. code-block:: text
 
@@ -76,10 +79,10 @@ After instalation ``shelter-admin`` command is available. For help type
                             application settings module
       -h, --help            show this help message and exit
 
-The most important argument is ``-s/--settings``. It joins together
+The most important argument is :option:`-s/--settings`. It joins together
 Shelter library and your application. Format is Python module path, eg.
 ``myproject.settings``. Second option how to pass settings module is
-``SHELTER_SETTINGS_MODULE`` environment variable. If both are passed,
+:envvar:`SHELTER_SETTINGS_MODULE` environment variable. If both are passed,
 command line argument has higher priority than environment variable.
 
 .. code-block:: sh
@@ -90,10 +93,11 @@ command line argument has higher priority than environment variable.
     # Pass settings module using environment variable
     SHELTER_SETTINGS_MODULE=myapp.settings shelter-admin command
 
-For creating a new project skeleton Shelter provides ``startproject`` comand.
-Project name has the same rules as Python module name. Entry point into new
-application is a script ``manage.py``. Command ``devserver`` runs the project
-(HTTP server, which listen on default port ``8000``) in development mode.
+For creating a new project skeleton Shelter provides :option:`startproject`
+comand. Project name has the same rules as Python module name. Entry point
+into new application is a script :command:`manage.py`. Command
+:option:`devserver` runs the project (HTTP server, which listen on default
+port ``:8000``) in development mode.
 
 .. code-block:: sh
 
@@ -112,12 +116,9 @@ Documentation
 
    dev-guide
 
-Source code
------------
+Source code and license
+-----------------------
 
-https://github.com/seznam/shelter
-
-License
--------
-
-3-clause BSD
+Source codes are available on GitHub `https://github.com/seznam/shelter
+<https://github.com/seznam/shelter>`_ under the `3-clause BSD license
+<https://opensource.org/licenses/BSD-3-Clause>`_.

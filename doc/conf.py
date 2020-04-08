@@ -138,6 +138,8 @@ latex_documents = [
      'Jan Seifert', 'manual'),
 ]
 
+latex_show_urls = 'footnote'
+
 # -- Options for manual page output ------------------------------------------
 
 # One entry per manual page. List of tuples
