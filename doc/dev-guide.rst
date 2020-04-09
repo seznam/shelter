@@ -39,7 +39,7 @@ List of basic settings
 NAME
 """"
 
-.. py:module:: settings.NAME
+.. py:data:: settings.NAME
 
 Default: name of the executable
 
@@ -52,7 +52,7 @@ Name of the application. This name will be shown in the OS process list.
 INIT_HANDLER
 """"""""""""
 
-.. py:module:: settings.INIT_HANDLER
+.. py:data:: settings.INIT_HANDLER
 
 Default: ``None``
 
@@ -75,7 +75,7 @@ returns nothing. Multiple hooks can be placed in :class:`!tuple`.
 APP_SETTINGS_HANDLER
 """"""""""""""""""""
 
-.. py:module:: settings.APP_SETTINGS_HANDLER
+.. py:data:: settings.APP_SETTINGS_HANDLER
 
 Default: ``None``
 
@@ -94,7 +94,7 @@ in :class:`~!tornado.web.Application` constructor, but it is not Shelter
 SIGUSR1_HANDLER
 """""""""""""""
 
-.. py:module:: settings.SIGUSR1_HANDLER
+.. py:data:: settings.SIGUSR1_HANDLER
 
 Default: ``None``
 
@@ -110,7 +110,7 @@ called in the main process and in all workers and service processes.
 SIGUSR2_HANDLER
 """""""""""""""
 
-.. py:module:: settings.SIGUSR2_HANDLER
+.. py:data:: settings.SIGUSR2_HANDLER
 
 Default: ``None``
 
@@ -126,7 +126,7 @@ called only in process which received signal.
 CONFIG_CLASS
 """"""""""""
 
-.. py:module:: settings.CONFIG_CLASS
+.. py:data:: settings.CONFIG_CLASS
 
 Default: ``'shelter.core.config.Config'``
 
@@ -141,7 +141,7 @@ from :mod:`settings` module to instance attributes.
 CONTEXT_CLASS
 """""""""""""
 
-.. py:module:: settings.CONTEXT_CLASS
+.. py:data:: settings.CONTEXT_CLASS
 
 Default: ``'shelter.core.context.Context'``
 
@@ -156,7 +156,7 @@ resources, e.g. database connection. Shelter provides default
 MANAGEMENT_COMMANDS
 """""""""""""""""""
 
-.. py:module:: settings.MANAGEMENT_COMMANDS
+.. py:data:: settings.MANAGEMENT_COMMANDS
 
 Default: ``()`` (empty :class:`!tuple`)
 
@@ -176,7 +176,7 @@ console, commands are printed in help messages.
 SERVICE_PROCESSES
 """""""""""""""""
 
-.. py:module:: settings.SERVICE_PROCESSES
+.. py:data:: settings.SERVICE_PROCESSES
 
 Default: ``()`` (empty :class:`!tuple`)
 
@@ -201,7 +201,7 @@ started. If :data:`!False`, set *timeout* to :data:`!0` or :data:`!None`.
 INTERFACES
 """"""""""
 
-.. py:module:: settings.INTERFACES
+.. py:data:: settings.INTERFACES
 
 Default: no default value, required option
 
@@ -236,7 +236,7 @@ or :data:`UNIX_SOCKET` option, or both together.
 LOGGING
 """""""
 
-.. py:module:: settings.LOGGING
+.. py:data:: settings.LOGGING
 
 Default: root logger which logs to console:
 
@@ -267,8 +267,8 @@ Default: root logger which logs to console:
 Takes the logging configuration from a dictionary. See :mod:`logging.config`
 module and :func:`logging.config.dictConfig` function documentation.
 
-``shelter.core.config`` – application configuration class
----------------------------------------------------------
+``shelter.core.config`` – container for configuration
+-----------------------------------------------------
 
 .. automodule:: shelter.core.config
 

@@ -223,7 +223,7 @@ class Config(object):
     def name(self):
         """
         Application name. This name will be shown in the OS process list.
-        Value is obtained from :attr:`settings.NAME` option.
+        Value is obtained from :any:`settings.NAME` option.
         """
         return getattr(self.settings, 'NAME', sys.argv[0])
 
@@ -231,7 +231,7 @@ class Config(object):
     def init_handler(self):
         """
         Name of the hook, which is called when application is initialized.
-        Value is obtained from :attr:`settings.INIT_HANDLER` option.
+        Value is obtained from :any:`settings.INIT_HANDLER` option.
         """
         return getattr(self.settings, 'INIT_HANDLER', None)
 
@@ -240,7 +240,7 @@ class Config(object):
         """
         Name of the hook, which is called when *kwargs* for
         :class:`~tornado.web.Application` constructor is requested.
-        Value is obtained from :attr:`settings.APP_SETTINGS_HANDLER`
+        Value is obtained from :any:`settings.APP_SETTINGS_HANDLER`
         option.
         """
         return getattr(self.settings, 'APP_SETTINGS_HANDLER', None)
@@ -249,7 +249,7 @@ class Config(object):
     def sigusr1_handler(self):
         """
         Name of the hook, which is called when :const:`~!signal.SIGUSR1` is
-        received. Value is obtained from :attr:`settings.SIGUSR1_HANDLER`
+        received. Value is obtained from :any:`settings.SIGUSR1_HANDLER`
         option.
         """
         return getattr(self.settings, 'SIGUSR1_HANDLER', None)
@@ -258,7 +258,7 @@ class Config(object):
     def sigusr2_handler(self):
         """
         Name of the hook, which is called when :const:`~!signal.SIGUSR2` is
-        received. Value is obtained from :attr:`settings.SIGUSR2_HANDLER`
+        received. Value is obtained from :any:`settings.SIGUSR2_HANDLER`
         option.
         """
         return getattr(self.settings, 'SIGUSR2_HANDLER', None)
@@ -267,7 +267,7 @@ class Config(object):
     def context_class(self):
         """
         :class:`~shelter.core.context.Context` class. Value is obtained
-        from :attr:`settings.CONTEXT_CLASS` option.
+        from :any:`settings.CONTEXT_CLASS` option.
         """
         if 'context_class' not in self._cached_values:
             context_cls_name = getattr(self.settings, 'CONTEXT_CLASS', '')
@@ -283,7 +283,7 @@ class Config(object):
         """
         Interfaces as a :class:`!list` of
         :class:`shelter.core.config.Config.Interface` instances.
-        Value is obtained from :attr:`settings.INTERFACES` option.
+        Value is obtained from :any:`settings.INTERFACES` option.
         """
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
@@ -316,7 +316,7 @@ class Config(object):
         """
         Configuration of Python logging, see :mod:`logging.config`
         module and :func:`logging.config.dictConfig` function
-        documentation. Value is obtained from :attr:`settings.LOGGING`
+        documentation. Value is obtained from :any:`settings.LOGGING`
         option.
         """
         return getattr(self.settings, 'LOGGING', None)
@@ -325,7 +325,7 @@ class Config(object):
     def command_name(self):
         """
         Name of the current running management command. Value is obtained
-        command line. For example, if ``./manage.py devserver`` is being
-        run, value will be ``"devserver"``.
+        from command line. For example, if ``./manage.py devserver`` is
+        being run, value will be ``"devserver"``.
         """
         return self._args_parser.action
