@@ -1,5 +1,5 @@
 
-Developers guide
+Reference manual
 ================
 
 ``settings`` – basic configuration of your application
