@@ -108,6 +108,14 @@ port ``:8000``) in development mode.
 Type ``http://localhost:8000/`` into your browser. If you see text
 "**myproject - example handler**", it works!
 
+Tutorial
+--------
+
+.. toctree::
+   :maxdepth: 3
+
+   tutorial
+
 Reference manual
 ----------------
 
