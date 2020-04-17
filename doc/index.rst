@@ -45,23 +45,24 @@ Instalation and quick start
 
 Installation from source code:
 
-.. code-block:: sh
+.. code-block:: console
 
-    git clone https://github.com/seznam/shelter.git
-    cd shelter
-    python setup.py install
+    $ git clone https://github.com/seznam/shelter.git
+    $ cd shelter
+    $ python setup.py install
 
 Installation from PyPi:
 
-.. code-block:: sh
+.. code-block:: console
 
-    pip install shelter
+    $ pip install shelter
 
 After instalation :command:`shelter-admin` command is available. For help
 type ``shelter-admin -h``:
 
-.. code-block:: text
+.. code-block:: console
 
+    $ shelter-admin -h
     usage: shelter-admin [-s SETTINGS] [-h]
                          {devserver,runserver,shell,showconfig,startproject} …
 
@@ -85,13 +86,13 @@ Shelter library and your application. Format is Python module path, eg.
 :envvar:`SHELTER_SETTINGS_MODULE` environment variable. If both are passed,
 command line argument has higher priority than environment variable.
 
-.. code-block:: sh
+.. code-block:: console
 
-    # Pass settings module using -s argument
-    shelter-admin -s myapp.settings command
+    $ # Pass settings module using -s argument
+    $ shelter-admin -s myapp.settings command
 
-    # Pass settings module using environment variable
-    SHELTER_SETTINGS_MODULE=myapp.settings shelter-admin command
+    $ # Pass settings module using environment variable
+    $ SHELTER_SETTINGS_MODULE=myapp.settings shelter-admin command
 
 For creating a new project skeleton Shelter provides :option:`startproject`
 comand. Project name has the same rules as Python module name. Entry point
@@ -99,11 +100,11 @@ into new application is a script :command:`manage.py`. Command
 :option:`devserver` runs the project (HTTP server, which listen on default
 port ``:8000``) in development mode.
 
-.. code-block:: sh
+.. code-block:: console
 
-    shelter-admin startproject myproject
-    cd myproject/
-    ./manage.py devserver
+    $ shelter-admin startproject myproject
+    $ cd myproject/
+    $ ./manage.py devserver
 
 Type ``http://localhost:8000/`` into your browser. If you see text
 "**myproject - example handler**", it works!

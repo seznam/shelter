@@ -27,24 +27,24 @@ ctr              click-through rate, ratio of users who click on the advertised
                  entity to the number of total users who view a page
 ================ =============================================================
 
-First step – new project creation
----------------------------------
+The first step – new project creation
+-------------------------------------
 
 For creating a project Shelter provides :option:`startproject` command. So,
 create a new Python 3 isolated environment (see `virtualenv
 <https://virtualenv.pypa.io/en/latest/>`_ and write in console:
 
-.. code-block:: sh
+.. code-block:: console
 
-    shelter-admin startproject recsystem
+    $ shelter-admin startproject recsystem
     cd recsystem/
     python3 setup.py develop
 
-See `First step <https://github.com/seifert/recsystem/commit/258eea7>`_
+See `The first step <https://github.com/seifert/recsystem/commit/258eea7>`_
 full diff on GitHub.
 
-Second step – define a database schema and connection
------------------------------------------------------
+The second step – define a database schema and connection
+---------------------------------------------------------
 
 In our example project a `SQLite <https://www.sqlite.org>`_ database is
 used because it is part of Python Standard Library. So no other packages
@@ -169,5 +169,166 @@ necessary.
         'database': os.path.join(tempfile.gettempdir(), 'recsystem.db'),
     }
 
-See `Second step <https://github.com/seifert/recsystem/commit/d4efe24>`_
+See `The second step <https://github.com/seifert/recsystem/commit/d4efe24>`_
+full diff on GitHub.
+
+The third step – fetch entities from RSS
+----------------------------------------
+
+Now we have defined the database, so we need fill the database with data. It
+can be solved by script and cron job, which periodically fetches data and
+stores them into database. You can write a script with this functionality,
+however you must parse configuration again, create database connection and a
+lot of other things. Therfore Shelter provides ancestor for writing managements
+commands. The management command obtains instance of the
+:class:`~shelter.core.context.Context`, so you can avoid boring things and use
+all advantages which Shelter provides. For our management command we define
+new configuration, object which encapsulates RSS feeder, new nethod into
+storage and management command itself.
+
+In configuration, we need URL of the RSS feed and optional timeout for network
+operation. We enrich :class:`~recsystem.config.Config` by new property with
+RSS feed configuration.
+
+.. code-block:: python
+    :caption: recsystem/recsystem/config.py
+
+    import collections
+
+    RSSFeedConfig = collections.namedtuple('RSSFeedConfig', ['url', 'timeout'])
+
+    class Config(Config):
+
+        @cached_property
+        def rss_feed(self):
+            return RSSFeedConfig(
+                self._settings.RSS_FEED['url'],
+                self._settings.RSS_FEED.get('timeout'),
+            )
+
+Then we enrich :class:`~recsystem.storage.Storage` by new method, which inserts
+new entity into database table.
+
+.. code-block:: python
+    :caption: recsystem/recsystem/storage.py
+
+    class Storage(object):
+
+        class DuplicateEntry(Exception):
+            pass
+
+        def insert_entity(self, published, guid, url, title):
+            with self.connection:
+                try:
+                    self.connection.execute(
+                        "INSERT INTO entities (published, guid, url, title) "
+                        "VALUES (?, ?, ?, ?)", (published, guid, url, title))
+                except sqlite3.IntegrityError:
+                    raise self.DuplicateEntry(guid)
+
+Now we have to implement fetching and parsing the RSS feed. It is easy, both
+can do nice `feedparser <https://github.com/kurtmckee/feedparser>`_ module.
+Do not forget put new dependency into :file:`setup.py`.
+
+.. code-block:: python
+    :caption: recsystem/setup.py
+
+    install_requires=[
+        'feedparser',
+        ...
+    ],
+
+.. code-block:: python
+    :caption: recsystem/recsystem/rssfeeder.py (shortened)
+
+    import collections
+    import time
+
+    import feedparser
+
+    Entry = collections.namedtuple(
+        'Entry', ['published', 'guid', 'url', 'title'])
+
+    class RssFeeder(object):
+
+        ...
+
+        def iter_entries(self):
+            ...
+            rss = feedparser.parse(self.rss_feed_config.url)
+            ...
+            for entry in rss.entries:
+                yield Entry(
+                    published=int(time.mktime(entry.published_parsed)),
+                    guid=entry.id, url=entry.link, title=entry.title)
+            ...
+
+Put :class:`~recsystem.rssfeeder.RssFeeder` into
+:class:`~recsystem.context.Context` class.
+
+.. code-block:: python
+    :caption: recsystem/recsystem/context.py
+
+    from .rssfeeder import RssFeeder
+
+    class Context(context.Context):
+
+        @cached_property
+        def rss_feeder(self):
+            return RssFeeder(self.config.rss_feed)
+
+Now it is possible to write management command itself.
+
+.. code-block:: python
+    :caption: recsystem/recsystem/commands.py (shortened)
+
+    from shelter.core.commands import BaseCommand
+
+    class FetchRss(BaseCommand):
+
+        name = "fetch_rss"
+        help = "fetch new entries from rss feed"
+
+        def command(self):
+            for entry in self.context.rss_feeder.iter_entries():
+                try:
+                    self.context.storage.insert_entity(
+                        entry.published, entry.guid, entry.url, entry.title)
+                except self.context.storage.DuplicateEntry:
+                    pass  # Fail silently if entry has been inserted
+
+Finally it is necessary to register the management command and configure RSS
+feed.
+
+.. code-block:: python
+    :caption: recsystem/recsystem/settings.py
+
+    MANAGEMENT_COMMANDS = (
+        'recsystem.commands.FetchRss',
+    )
+
+    RSS_FEED = {
+        'url': 'http://feeds.bbci.co.uk/news/world/rss.xml',
+    }
+
+Now :option:`fetch_rss` command is available for :command:`manage.py` command.
+See help message and then try fetching enries from RSS.
+
+.. code-block:: console
+
+    $ manage-recsystem -h
+    usage: manage-recsystem [-s SETTINGS] [-h] {...,fetch_rss} ...
+
+    positional arguments:
+      {devserver,runserver,shell,showconfig,startproject,fetch_rss}
+                        specify action
+    ...
+    fetch_rss           fetch new entries from rss feed
+    ...
+
+    $ manage-recsystem fetch_rss
+    2020-04-17 22:41:43 shelter.core.commands.FetchRss INFO Fetch RSS
+    2020-04-17 22:41:43 shelter.core.commands.FetchRss INFO Fetched 16 entities
+
+See `The third step <https://github.com/seifert/recsystem/commit/5ead4f7>`_
 full diff on GitHub.

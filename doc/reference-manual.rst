@@ -18,20 +18,20 @@ pre-configured settings module to :mod:`!applicationname.settings`, so you
 needn't explicitly specify :mod:`!settings` module if you use these entry
 points.
 
-.. code-block:: sh
+.. code-block:: console
 
-    # Pass settings module using -s argument
-    shelter-admin -s myapplicaton.settings command
+    $ # Pass settings module using -s argument
+    $ shelter-admin -s myapplicaton.settings command
 
-    # Pass settings module using environment variable
-    SHELTER_SETTINGS_MODULE=myapplicaton.settings shelter-admin command
+    $ # Pass settings module using environment variable
+    $ SHELTER_SETTINGS_MODULE=myapplicaton.settings shelter-admin command
 
-    # Use manage.py script
-    cd myapplicaton
-    ./manage.py command
+    $ # Use manage.py script
+    $ cd myapplicaton
+    $ ./manage.py command
 
-    # Use manage-applicationname entry point
-    manage-myapplicaton command
+    $ # Use manage-applicationname entry point
+    $ manage-myapplicaton command
 
 List of basic settings
 ^^^^^^^^^^^^^^^^^^^^^^
