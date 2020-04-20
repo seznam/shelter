@@ -40,7 +40,7 @@ create a new Python 3 isolated environment (see `virtualenv
     cd recsystem/
     python3 setup.py develop
 
-See `The first step <https://github.com/seifert/recsystem/commit/258eea7>`_
+See `The first step <https://github.com/seifert/recsystem/commit/tutorial01>`_
 full diff on GitHub.
 
 The second step – define a database schema and connection
@@ -169,7 +169,7 @@ necessary.
         'database': os.path.join(tempfile.gettempdir(), 'recsystem.db'),
     }
 
-See `The second step <https://github.com/seifert/recsystem/commit/d4efe24>`_
+See `The second step <https://github.com/seifert/recsystem/commit/tutorial02>`_
 full diff on GitHub.
 
 The third step – fetch entities from RSS
@@ -206,8 +206,11 @@ RSS feed configuration.
                 self._settings.RSS_FEED.get('timeout'),
             )
 
-Then we enrich :class:`~recsystem.storage.Storage` by new method, which inserts
-new entity into database table.
+Then we enrich :class:`~recsystem.storage.Storage` by new method,
+which inserts new entity into database table. The method catches
+:exc:`sqlite3.IntegrityError` exception and wraps it into
+:exc:`recsystem.storage.DuplicateEntry` exception. Management command
+catches this exception to prevent duplicate enries.
 
 .. code-block:: python
     :caption: recsystem/recsystem/storage.py
@@ -227,8 +230,8 @@ new entity into database table.
                     raise self.DuplicateEntry(guid)
 
 Now we have to implement fetching and parsing the RSS feed. It is easy, both
-can do nice `feedparser <https://github.com/kurtmckee/feedparser>`_ module.
-Do not forget put new dependency into :file:`setup.py`.
+can provide awesome `feedparser <https://github.com/kurtmckee/feedparser>`_
+module. Do not forget put new dependency into :file:`setup.py`.
 
 .. code-block:: python
     :caption: recsystem/setup.py
@@ -237,6 +240,12 @@ Do not forget put new dependency into :file:`setup.py`.
         'feedparser',
         ...
     ],
+
+Now we define :class:`recsystem.rssfeeder.RssFeeder` class, which encapsulates
+RSS feed. The class defines :meth:`recsystem.rssfeeder.RssFeeder.iter_entries`
+method. The method returns a generator, which yields an instance of the
+:class:`recsystem.rssfeeder.Entry` – container which encapsulates RSS entry
+attributes.
 
 .. code-block:: python
     :caption: recsystem/recsystem/rssfeeder.py (shortened)
@@ -251,7 +260,8 @@ Do not forget put new dependency into :file:`setup.py`.
 
     class RssFeeder(object):
 
-        ...
+    def __init__(self, rss_feed_config):
+        self.rss_feed_config = rss_feed_config
 
         def iter_entries(self):
             ...
@@ -263,21 +273,30 @@ Do not forget put new dependency into :file:`setup.py`.
                     guid=entry.id, url=entry.link, title=entry.title)
             ...
 
-Put :class:`~recsystem.rssfeeder.RssFeeder` into
-:class:`~recsystem.context.Context` class.
+RSS feeder is shared resource, similar as database connection. We put
+instance of the :class:`~recsystem.rssfeeder.RssFeeder` into
+:class:`~recsystem.context.Context` class, so feeder will be accessible
+from management commands or HTTP handlers. It is not necessary to create
+instance of the feeder lazily, because instance stores only configuration,
+feed is fetched every :meth:`recsystem.rssfeeder.RssFeeder.iter_entries`
+call.
 
 .. code-block:: python
-    :caption: recsystem/recsystem/context.py
+    :caption: recsystem/recsystem/context.py (shortened)
 
     from .rssfeeder import RssFeeder
 
     class Context(context.Context):
 
-        @cached_property
-        def rss_feeder(self):
-            return RssFeeder(self.config.rss_feed)
+        def initialize(self):
+            ...
+            self.rss_feeder = RssFeeder(self.config.rss_feed)
 
-Now it is possible to write management command itself.
+Now it is possible to write management command itself. Command defines
+:attr:`~recsystem.commands.FetchRss.name` and
+:attr:`~recsystem.commands.FetchRss.help`. They will be shown in console
+when :option:`!--help` is passed. :meth:`~recsystem.commands.FetchRss.command`
+method is an entry point for command.
 
 .. code-block:: python
     :caption: recsystem/recsystem/commands.py (shortened)
@@ -297,8 +316,11 @@ Now it is possible to write management command itself.
                 except self.context.storage.DuplicateEntry:
                     pass  # Fail silently if entry has been inserted
 
-Finally it is necessary to register the management command and configure RSS
-feed.
+Finally it is necessary to register the management command and configure
+RSS feed. Registering is done simply by adding the command class into
+:data:`settings.MANAGEMENT_COMMANDS` setting. RSS feed settings needs only
+one option, url of the feed. Optionally you can specify timeout for network
+operations.
 
 .. code-block:: python
     :caption: recsystem/recsystem/settings.py
@@ -312,7 +334,9 @@ feed.
     }
 
 Now :option:`fetch_rss` command is available for :command:`manage.py` command.
-See help message and then try fetching enries from RSS.
+See help message and then try fetching enries from RSS. If you seee message
+like a *Fetched 16 entities*, it works. Run periodically this command, for
+example by :command:`cron`.
 
 .. code-block:: console
 
@@ -330,5 +354,5 @@ See help message and then try fetching enries from RSS.
     2020-04-17 22:41:43 shelter.core.commands.FetchRss INFO Fetch RSS
     2020-04-17 22:41:43 shelter.core.commands.FetchRss INFO Fetched 16 entities
 
-See `The third step <https://github.com/seifert/recsystem/commit/5ead4f7>`_
+See `The third step <https://github.com/seifert/recsystem/commit/tutorial03>`_
 full diff on GitHub.
