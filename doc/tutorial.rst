@@ -125,7 +125,7 @@ created. So if we call :meth:`recsystem.storage.Storage.create_schema` in
 :meth:`~shelter.core.context.Context.initialize` method, the database schema
 will be created during starting the server.
 :attr:`recsystem.context.Context.database` attribute holds the database
-connection. It is :class:`!property`, so connection will be created lazy when
+connection. It is :class:`!property`, so connection will be created lazily when
 it is accessed first time. Reason is prevent forking the connection in
 multiprocess environment.
 
