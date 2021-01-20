@@ -46,5 +46,11 @@ INTERFACES = {
 
         # URL path to HTTP handler routing.
         'URLS': '$package.urls.urls_default',
+
+        # Path to class of the Tornado's application.
+        'APP_CLASS': 'tornado.web.Application',
+
+        # Maximum amount of seconds unless process is successfully started.
+        'START_TIMEOUT': 5.0,
     },
 }

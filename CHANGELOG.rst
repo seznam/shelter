@@ -1,3 +1,8 @@
+2.3.1
+-----
+
++ Added ``START_TIMEOUT`` attribute on ``INTERFACES`` setting.
+
 2.3.0
 -----
 

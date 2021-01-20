@@ -385,6 +385,11 @@ defined in ``settings`` module. Interfaces can be set as either TCP/IP sockets
             # of the Tornado's application. If not specified, default
             # tornado.web.Application is used. 
             'APP_CLASS': 'myapp.core.app.TornadoApplication',
+
+            # Maximum amount of seconds unless process is
+            # successfully started, otherwise raise
+            # shelter.core.exceptions.ProcessError exception.
+            'START_TIMEOUT': 5.0,
         },
     }
 

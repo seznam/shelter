@@ -320,7 +320,7 @@ class RunServer(BaseCommand):
             for dummy_i in six.moves.range(processes):
                 worker = ProcessWrapper(
                     TornadoProcess, (tornado_app, sockets),
-                    wait_unless_ready=True, timeout=5.0,
+                    wait_unless_ready=True, timeout=interface.start_timeout,
                     name=name
                 )
                 workers.append(worker)
