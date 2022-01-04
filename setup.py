@@ -29,12 +29,9 @@ description = (
 )
 
 try:
-    if sys.version_info >= (3,):
-        long_description = open('README.rst', 'rb').read().decode('utf-8')
-    else:
-        long_description = open('README.rst', 'r').read().decode('utf-8')
+    long_description = open('README.rst', 'rt').read()
 except IOError:
-        long_description = description
+    long_description = description
 
 setup(
     name="shelter",
@@ -46,11 +43,11 @@ setup(
     license="BSD",
     url='https://github.com/seznam/shelter',
     classifiers=[
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'License :: OSI Approved :: BSD License',
         'Operating System :: OS Independent',
         'Development Status :: 5 - Production/Stable',
@@ -63,14 +60,12 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'tornado>=3.2',
-        'six',
+        'tornado>=4.5',
         'setproctitle>=1.1',
     ],
     tests_require=[
         'pytest-cov',
         'pytest',
-        'mock',
     ],
     test_suite='tests',
     cmdclass={

@@ -7,7 +7,6 @@ import collections
 import logging.config
 import sys
 
-import six
 import tornado.web
 
 from shelter.core.cmdlineparser import argument
@@ -16,6 +15,8 @@ from shelter.utils.imports import import_object
 from shelter.utils.net import parse_host
 
 __all__ = ['Config', 'argument']
+
+argument = argument
 
 BASE_LOGGING = {
     'version': 1,
@@ -142,7 +143,7 @@ class Config(object):
         """
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
-            for name, interface in six.iteritems(self.settings.INTERFACES):
+            for name, interface in self.settings.INTERFACES.items():
                 listen = interface.get('LISTEN')
                 unix_socket = interface.get('UNIX_SOCKET')
                 if not listen and not unix_socket:

@@ -8,8 +8,6 @@ import os.path
 from gettext import gettext as _
 from string import Template
 
-import six
-
 from shelter.core.commands import BaseCommand, argument
 from shelter.core.exceptions import CommandError
 
@@ -66,7 +64,6 @@ class StartProject(BaseCommand):
 
     def command(self):
         substitute_map = {
-            'python': 'python3' if six.PY3 else 'python2',
             'package': self.context.config.args_parser.name[0],
             'author_name': self.context.config.args_parser.author_name,
             'author_email': self.context.config.args_parser.author_email,

@@ -1,7 +1,8 @@
 
 import logging
 
-import mock
+from unittest import mock
+
 import pytest
 
 from shelter.core.commands import BaseCommand

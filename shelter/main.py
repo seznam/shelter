@@ -12,8 +12,6 @@ import traceback
 
 from gettext import gettext as _
 
-import six
-
 from shelter.commands import SHELTER_MANAGEMENT_COMMANDS
 from shelter.core.exceptions import ImproperlyConfiguredError
 from shelter.core.commands import BaseCommand
@@ -106,7 +104,7 @@ def main(args=None):
     subparsers = parser.add_subparsers(
         dest='action', help=_('specify action')
     )
-    for command_cls in six.itervalues(commands):
+    for command_cls in commands.values():
         subparser = subparsers.add_parser(
             command_cls.name, help=command_cls.help)
         for command_args, kwargs in command_cls.arguments:

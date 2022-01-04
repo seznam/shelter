@@ -3,13 +3,13 @@ Module :module:`shelter.contrib.config.iniconfig` provides **INI files**
 configuration.
 """
 
+import configparser
 import glob
 import logging.config
 import os.path
 
 from gettext import gettext as _
 
-import six.moves
 import tornado.web
 
 from shelter.core.exceptions import ImproperlyConfiguredError
@@ -21,10 +21,7 @@ __all__ = ['IniConfig']
 
 logger = logging.getLogger(__name__)
 
-CONFIGPARSER_EXC = (
-    six.moves.configparser.NoSectionError,
-    six.moves.configparser.NoOptionError,
-)
+CONFIGPARSER_EXC = (configparser.NoSectionError, configparser.NoOptionError)
 
 
 def get_conf_d_files(path):
@@ -75,7 +72,7 @@ def get_configparser(filename=''):
             "'-f/--config-file' command line argument."
         ))
 
-    parser = six.moves.configparser.RawConfigParser()
+    parser = configparser.RawConfigParser()
     for conf_file in get_conf_files(filename):
         logger.info("Found config '%s'", conf_file)
         if not parser.read(conf_file):
@@ -143,7 +140,7 @@ class IniConfig(Config):
         """
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
-            for name, interface in six.iteritems(self.settings.INTERFACES):
+            for name, interface in self.settings.INTERFACES.items():
                 interface_name = 'interface_%s' % name
                 # Hostname:port + unix socket
                 try:

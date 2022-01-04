@@ -11,7 +11,6 @@ import sys
 import time
 
 import setproctitle
-import six
 
 import tornado.httpserver
 import tornado.ioloop
@@ -54,12 +53,8 @@ class ProcessWrapper(object):
 
         self.name = name if name is not None else process_cls.__name__
 
-    if six.PY3:
-        def __bool__(self):
-            return self.is_alive
-    else:
-        def __nonzero__(self):
-            return self.is_alive
+    def __bool__(self):
+        return self.is_alive
 
     @property
     def pid(self):
@@ -317,7 +312,7 @@ class RunServer(BaseCommand):
                 "Init %d worker(s) for interface '%s' (%s)",
                 processes, name, ", ".join(listen_on))
 
-            for dummy_i in six.moves.range(processes):
+            for dummy_i in range(processes):
                 worker = ProcessWrapper(
                     TornadoProcess, (tornado_app, sockets),
                     wait_unless_ready=True, timeout=interface.start_timeout,

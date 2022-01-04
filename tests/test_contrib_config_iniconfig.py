@@ -1,20 +1,19 @@
 
+import configparser
 import importlib
 import os.path
 
-from shelter.core.cmdlineparser import ArgumentParser
+from unittest import mock
 
 import pytest
-import mock
 import tornado.web
 
-from six.moves import configparser
-
+from shelter.core.context import Context
+from shelter.core.exceptions import ImproperlyConfiguredError
 from shelter.contrib.config.iniconfig import (
     get_conf_d_files, get_conf_files, get_configparser, IniConfig
 )
-from shelter.core.exceptions import ImproperlyConfiguredError
-from shelter.core.context import Context
+from shelter.core.cmdlineparser import ArgumentParser
 
 import tests.test_core_app
 

@@ -1,3 +1,2 @@
 tornado>=3.2
-six
 setproctitle>=1.1
