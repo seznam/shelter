@@ -1,26 +1,7 @@
 
-import sys
-
 from setuptools import setup, find_packages
-from setuptools.command.test import test as TestCommand
 
 from shelter import __version__ as VERSION
-
-
-class PyTest(TestCommand):
-
-    user_options = [
-        ('pytest-args=', 'a', "Arguments to pass to py.test"),
-    ]
-
-    def initialize_options(self):
-        TestCommand.initialize_options(self)
-        self.pytest_args = []
-
-    def run_tests(self):
-        import pytest
-        errno = pytest.main(self.pytest_args)
-        sys.exit(errno)
 
 
 description = (
@@ -63,14 +44,6 @@ setup(
         'tornado>=4.5',
         'setproctitle>=1.1',
     ],
-    tests_require=[
-        'pytest-cov',
-        'pytest',
-    ],
-    test_suite='tests',
-    cmdclass={
-        'test': PyTest,
-    },
     entry_points={
         'console_scripts': [
             'shelter-admin = shelter.main:main',
