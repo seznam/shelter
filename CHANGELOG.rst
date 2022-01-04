@@ -3,6 +3,7 @@
 
 + Removed Python 2.7, 3.4 and 3.5 support.
 + Use tox for running tests.
++ Use flake8 for coding style check.
 
 2.3.1
 -----

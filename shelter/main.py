@@ -48,7 +48,9 @@ def get_management_commands(settings):
     for name in itertools.chain(SHELTER_MANAGEMENT_COMMANDS, app_commands):
         command_obj = import_object(name)
         if not issubclass(command_obj, BaseCommand):
-            raise ValueError("'%s' is not subclass of the BaseCommand" % name)
+            raise ValueError(
+                "'{}' is not subclass of the BaseCommand".format(name)
+            )
         commands[command_obj.name] = command_obj
     return commands
 
@@ -96,7 +98,9 @@ def main(args=None):
     try:
         settings = get_app_settings(parser, args)
     except ImportError as exc:
-        parser.error(_("Invalid application settings module: {}").format(exc))
+        parser.error(
+            _("Invalid application settings module: {}").format(exc)  # noqa
+        )
 
     # Get management commands and add their arguments into command
     # line parser

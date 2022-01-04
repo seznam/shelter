@@ -52,8 +52,9 @@ class DevServer(BaseCommand):
         # Run IOLoop
         if listen_on:
             self.stdout.write(
-                "Start dev server on %s, press Ctrl+C to stop\n" %
-                ", ".join(listen_on)
+                "Start dev server on {}, press Ctrl+C to stop\n".format(
+                    ", ".join(listen_on)
+                )
             )
             self.stdout.flush()
 

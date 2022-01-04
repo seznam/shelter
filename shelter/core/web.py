@@ -35,5 +35,5 @@ class NullHandler(BaseRequestHandler):
     """
 
     def get(self, *unused_args, **unused_kwargs):
-        self.write("Interface '%s' works!\n" % self.interface.name)
+        self.write("Interface '{}' works!\n".format(self.interface.name))
         self.set_header("Content-Type", 'text/plain; charset=UTF-8')

@@ -73,7 +73,9 @@ class StartProject(BaseCommand):
         dest_dir = os.path.join(os.getcwd(), substitute_map['package'])
 
         if os.path.isdir(dest_dir):
-            raise CommandError("%s already exists" % substitute_map['package'])
+            raise CommandError(
+                "{} already exists".format(substitute_map['package'])
+            )
         else:
             os.mkdir(dest_dir)
 
@@ -94,8 +96,8 @@ class StartProject(BaseCommand):
                 os.mkdir(dst_name)
             else:
                 # Copy file and adjust content
-                with open(src_name, 'rt') as f_src,\
-                        open(dst_name, 'wt') as f_dst:
-                    f_dst.write(substitute(f_src.read(), substitute_map))
+                with open(src_name, 'rt') as f_src:
+                    with open(dst_name, 'wt') as f_dst:
+                        f_dst.write(substitute(f_src.read(), substitute_map))
             # Keep permissions
             os.chmod(dst_name, os.stat(src_name).st_mode)

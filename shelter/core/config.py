@@ -222,5 +222,5 @@ class Config(object):
         application is created or :const:`None` when no handler.. Return
         :class:`dict` which is passed as *\*\*settings* argument into
         ``tornado.web.Application`` constructor.
-        """
+        """  # noqa
         return getattr(self.settings, 'APP_SETTINGS_HANDLER', None)

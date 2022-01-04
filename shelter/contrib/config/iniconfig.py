@@ -35,7 +35,7 @@ def get_conf_d_files(path):
         ['conf/conf.d/10-base.conf', 'conf/conf.d/99-dev.conf']
     """
     if not os.path.isdir(path):
-        raise ValueError("'%s' is not a directory" % path)
+        raise ValueError("'{}' is not a directory".format(path))
     files_mask = os.path.join(path, "*.conf")
     return [f for f in sorted(glob.glob(files_mask)) if os.path.isfile(f)]
 
@@ -51,8 +51,8 @@ def get_conf_files(filename):
         ['exampleapp.conf', 'exampleapp.conf.d/10-database.conf']
     """
     if not os.path.isfile(filename):
-        raise ValueError("'%s' is not a file" % filename)
-    conf_d_path = "%s.d" % filename
+        raise ValueError("'{}' is not a file".format(filename))
+    conf_d_path = "{}.d".format(filename)
     if not os.path.exists(conf_d_path):
         return [filename]
     return [filename] + get_conf_d_files(conf_d_path)
@@ -141,7 +141,7 @@ class IniConfig(Config):
         if 'interfaces' not in self._cached_values:
             self._cached_values['interfaces'] = []
             for name, interface in self.settings.INTERFACES.items():
-                interface_name = 'interface_%s' % name
+                interface_name = 'interface_{}'.format(name)
                 # Hostname:port + unix socket
                 try:
                     listen = self.config_parser.get(interface_name, 'Listen')

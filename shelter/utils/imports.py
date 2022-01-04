@@ -18,7 +18,7 @@ def import_object(name):
     """
     parts = name.split('.')
     if len(parts) < 2:
-        raise ValueError("Invalid name '%s'" % name)
+        raise ValueError("Invalid name '{}'".format(name))
     module_name = ".".join(parts[:-1])
     obj_name = parts[-1]
     module = importlib.import_module(module_name)

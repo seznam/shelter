@@ -76,7 +76,8 @@ class ProcessWrapper(object):
         """
         if self._process is None:
             raise ProcessError(
-                "Process '%s' has not been started yet" % self.name)
+                "Process '{}' has not been started yet".format(self.name)
+            )
         return self._process.exitcode
 
     @property
@@ -102,7 +103,8 @@ class ProcessWrapper(object):
         """
         if self:
             raise ProcessError(
-                "Process '%s' has been already started" % self.name)
+                "Process '{}' has been already started".format(self.name)
+            )
         first_run = not self.has_started
         # Run process
         self._process = self._process_cls(*self._process_args)
@@ -116,7 +118,8 @@ class ProcessWrapper(object):
                     time.sleep(0.25)
                 if not self._process.ready:
                     raise ProcessError(
-                        "Timeout during start process '%s'" % self.name)
+                        "Timeout during start process '{}'".format(self.name)
+                    )
             else:
                 while not self._process.ready:
                     time.sleep(0.25)

@@ -8,4 +8,4 @@ class ShowValueHandler(BaseRequestHandler):
         return None
 
     def get(self):
-        self.write("Current value: %s" % self.context.value)
+        self.write("Current value: {}".format(self.context.value))

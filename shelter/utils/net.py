@@ -28,5 +28,5 @@ def parse_host(host):
     except ValueError:
         port = None
     if not port or port < 1 or port > 65535:
-        raise ValueError("Invalid port number '%s'" % port)
+        raise ValueError("Invalid port number '{}'".format(port))
     return address, port
