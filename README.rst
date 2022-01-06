@@ -4,7 +4,8 @@ Shelter
 Shelter is a *Python's Tornado* wrapper which provides classes and helpers
 for creation new application skeleton, writing management commands (like a
 *Django*), service processes and request handlers. It was tested with
-*Python 3.6* or higher and *Tornado 4.5* or higher.
+*Python 3.6* or higher and *Tornado 4.5* or higher. On Python 3.10 Tornado
+6.0 or greater is required!
 
 Instalation
 -----------

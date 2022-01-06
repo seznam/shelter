@@ -9,8 +9,8 @@ Shelter – thin Python's Tornado wrapper
 **Shelter** is a `Python's Tornado <https://www.tornadoweb.org/en/stable/>`_
 wrapper which provides classes and helpers for creation new application
 skeleton, writing management commands (like Django), service processes and
-request handlers. It was tested with Python 2.7 and Python 3.4 or higher
-and Tornado 3.2 or higher.
+request handlers. It is tested with *Python 3.6* or higher and *Tornado 4.5*
+or higher. On Python 3.10 Tornado 6.0 or greater is required!
 
 Instalation and quick start
 ---------------------------
