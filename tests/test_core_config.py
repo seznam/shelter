@@ -54,6 +54,7 @@ def test_config_interfaces():
     assert interfaces[0].port == 4445
     assert interfaces[0].unix_socket is None
     assert interfaces[0].app_cls is tornado.web.Application
+    assert interfaces[0].api_doc == {}
     assert interfaces[0].processes == 1
     assert interfaces[0].start_timeout == 5.0
     assert len(interfaces[0].urls) == 0
@@ -63,6 +64,7 @@ def test_config_interfaces():
     assert interfaces[1].port == 4443
     assert interfaces[1].unix_socket is None
     assert interfaces[1].app_cls is tornado.web.Application
+    assert interfaces[1].api_doc == {'enabled': True}
     assert interfaces[1].processes == 12
     assert interfaces[1].start_timeout == 30.0
     assert len(interfaces[1].urls) == 2
@@ -72,6 +74,7 @@ def test_config_interfaces():
     assert interfaces[2].port == 4447
     assert interfaces[2].unix_socket is None
     assert interfaces[2].app_cls is tests.test_core_app.ApplicationTest
+    assert interfaces[2].api_doc == {'enabled': True, 'version': '0.0.1'}
     assert interfaces[2].processes == 2
     assert interfaces[2].start_timeout == 5.0
     assert len(interfaces[2].urls) == 0
@@ -81,6 +84,7 @@ def test_config_interfaces():
     assert interfaces[3].port is None
     assert interfaces[3].unix_socket == '/tmp/tornado.socket'
     assert interfaces[3].app_cls is tests.test_core_app.ApplicationTest
+    assert interfaces[3].api_doc == {}
     assert interfaces[3].processes == 6
     assert interfaces[3].start_timeout == 5.0
     assert len(interfaces[3].urls) == 3

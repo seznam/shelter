@@ -1,0 +1,52 @@
+{
+    "info": {
+        "description": "Documentation for the test-shelter-app API",
+        "title": "test-shelter-app API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/baz": {
+            "get": {
+                "tags": [
+                    "interface"
+                ],
+                "summary": "Get confirmation message",
+                "description": "Get the confirmation message that the interface works",
+                "responses": {
+                    "200": {
+                        "description": "Confirmation message",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/bar": {
+            "get": {
+                "tags": [
+                    "interface"
+                ],
+                "summary": "Get confirmation message",
+                "description": "Get the confirmation message that the interface works",
+                "responses": {
+                    "200": {
+                        "description": "Confirmation message",
+                        "content": {
+                            "text/plain": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "openapi": "3.0.3"
+}

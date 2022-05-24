@@ -186,6 +186,11 @@ class IniConfig(Config):
                     app_cls = import_object(app_obj_name)
                 else:
                     app_cls = tornado.web.Application
+                try:
+                    api_doc = self.config_parser.get(
+                        interface_name, 'ApiDoc')
+                except CONFIGPARSER_EXC:
+                    api_doc = interface.get('API_DOC', {})
                 # Start timeout
                 try:
                     start_timeout = self.config_parser.getfloat(
@@ -195,7 +200,7 @@ class IniConfig(Config):
 
                 interface = self.Interface(
                     name, host, port, unix_socket, processes, urls,
-                    app_cls, start_timeout)
+                    app_cls, api_doc, start_timeout)
                 self._cached_values['interfaces'].append(interface)
 
         return self._cached_values['interfaces']

@@ -52,7 +52,7 @@ class Config(object):
     Interface = collections.namedtuple(
         'Interface', [
             'name', 'host', 'port', 'unix_socket',
-            'processes', 'urls', 'app_cls', 'start_timeout']
+            'processes', 'urls', 'app_cls', 'api_doc', 'start_timeout']
     )
     """
     Container which encapsulates arguments of the interface.
@@ -161,10 +161,11 @@ class Config(object):
                     app_cls = import_object(app_cls_name)
                 else:
                     app_cls = tornado.web.Application
+                api_doc = interface.get('API_DOC', {})
                 start_timeout = float(interface.get('START_TIMEOUT', 5.0))
                 interface = self.Interface(
                     name, host, port, unix_socket, processes,
-                    urls, app_cls, start_timeout)
+                    urls, app_cls, api_doc, start_timeout)
                 self._cached_values['interfaces'].append(interface)
         return self._cached_values['interfaces']
 

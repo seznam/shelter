@@ -35,5 +35,19 @@ class NullHandler(BaseRequestHandler):
     """
 
     def get(self, *unused_args, **unused_kwargs):
+        """Returns simple message confirming the interface works
+        ---
+        tags: [interface]
+        summary: Get confirmation message
+        description: Get the confirmation message that the interface works
+
+        responses:
+            200:
+                description: Confirmation message
+                content:
+                    text/plain:
+                        schema:
+                            type: string
+              """
         self.write("Interface '%s' works!\n" % self.interface.name)
         self.set_header("Content-Type", 'text/plain; charset=UTF-8')

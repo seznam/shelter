@@ -63,9 +63,13 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        'apispec',
+        'apispec-webframeworks',
+        'marshmallow',
         'tornado>=3.2',
-        'six',
         'setproctitle>=1.1',
+        'six',
+        'swagger-ui-py',
     ],
     tests_require=[
         'pytest-cov',

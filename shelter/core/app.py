@@ -7,6 +7,7 @@ import tornado.web
 
 from shelter.core.web import NullHandler
 from shelter.utils.imports import import_object
+from shelter.utils.swagger import create_api_doc
 
 __all__ = ['get_tornado_apps']
 
@@ -31,10 +32,11 @@ def get_tornado_apps(context, debug=False):
         urls = interface.urls
         if not urls:
             urls = [tornado.web.URLSpec('/', NullHandler)]
-        apps.append(
-            interface.app_cls(
+        app = interface.app_cls(
                 urls, debug=debug, context=context,
                 interface=interface, **settings
-            )
         )
+        if interface.api_doc.get('enabled'):
+            create_api_doc(context.config.name, urls, app, interface.api_doc, interface.name)
+        apps.append(app)
     return apps

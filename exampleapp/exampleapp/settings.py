@@ -30,6 +30,11 @@ INTERFACES = {
         'PROCESSES': 2,
         'URLS': 'exampleapp.urls.urls_default',
         'APP_CLASS': 'exampleapp.app.Application',
+        'API_DOC': {
+            'enabled': True,
+            'version': '1.0.0',
+            'openapi_version': '3.0.3',
+        },
     },
     'debug': {
         'LISTEN': ':8001',

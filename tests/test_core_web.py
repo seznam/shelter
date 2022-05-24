@@ -22,7 +22,7 @@ def test_null_handler():
         [], context=object(), interface=Config.Interface(
             name='foo', host='', port=1, unix_socket=None,
             processes=0, urls=[], app_cls=tornado.web.Application,
-            start_timeout=5.0
+            api_doc={}, start_timeout=5.0
         )
     )
     req = mock.Mock()

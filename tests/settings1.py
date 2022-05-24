@@ -11,6 +11,7 @@ INTERFACES = {
         'PROCESSES': 12,
         'URLS': 'tests.urls1.urls_http',
         'APP_CLASS': 'tornado.web.Application',
+        'API_DOC': {'enabled': True},
         'START_TIMEOUT': 30.0,
     },
     'fastrpc': {
@@ -20,6 +21,7 @@ INTERFACES = {
         'LISTEN': ':4447',
         'APP_CLASS': 'tests.test_core_app.ApplicationTest',
         'PROCESSES': 2,
+        'API_DOC': {'enabled': True, 'version': '0.0.1'},
     },
     'unix': {
         'UNIX_SOCKET': '/tmp/tornado.socket',
