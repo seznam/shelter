@@ -512,6 +512,37 @@ configuration file overrides previous defined value.
     level=INFO
     handlers=console
 
+shelter.contrib.swagger.SwaggerApplication
+``````````````````````````````````````````
+
+Extends ``tornado.web.Application`` with support of Swagger API documentation.
+
+Usage:
+
+1. Install shelter with swagger extras: ``shelter[swagger]``
+2. Refer the ``APP_CLASS`` in interface settings to a descendant class of ``shelter.contrib.swagger.SwaggerApplication``
+3. Provide your handler methods with OpenApi docstring, eg.
+
+::
+
+    def get(self):
+        """Returns current value from internal context
+        ---
+        tags: [value]
+        summary: Get current value
+        description: Get the current value from internal context
+
+        responses:
+            200:
+                description: Message with the current value
+                content:
+                    text/plain:
+                        schema:
+                            type: string
+        """
+        self.write("Current value: %s" % self.context.value)
+
+
 License
 -------
 

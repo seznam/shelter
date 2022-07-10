@@ -8,5 +8,5 @@ from exampleapp.handlers import ShowValueHandler
 
 urls_default = (
     URLSpec(r'/', NullHandler),
-    URLSpec(r'/value/', ShowValueHandler),
+    URLSpec(r'/value', ShowValueHandler),
 )

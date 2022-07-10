@@ -1,3 +1,8 @@
+2.4.0
+-----
+
++ Added optional Swagger support.
+
 2.3.1
 -----
 

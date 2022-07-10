@@ -67,6 +67,14 @@ setup(
         'six',
         'setproctitle>=1.1',
     ],
+    extras_require={
+        "swagger": [
+            'apispec',
+            'apispec-webframeworks',
+            'marshmallow',
+            'swagger-ui-py',
+        ]
+    },
     tests_require=[
         'pytest-cov',
         'pytest',
