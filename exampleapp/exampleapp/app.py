@@ -2,12 +2,12 @@
 import logging
 import os
 
-from shelter.contrib.swagger import SwaggerApplication
+import tornado.web
 
 logger = logging.getLogger(__name__)
 
 
-class Application(SwaggerApplication):
+class Application(tornado.web.Application):
 
     pass
 
