@@ -515,12 +515,15 @@ configuration file overrides previous defined value.
 shelter.contrib.swagger.SwaggerApplication
 ``````````````````````````````````````````
 
+**Requires Python 3.6 or newer.**
+
 Extends ``tornado.web.Application`` with support of Swagger API documentation.
 
 Usage:
 
 1. Install shelter with swagger extras: ``shelter[swagger]``
-2. Refer the ``APP_CLASS`` in interface settings to a descendant class of ``shelter.contrib.swagger.SwaggerApplication``
+2. Refer the ``APP_CLASS`` in interface settings to a descendant class of
+   ``shelter.contrib.swagger.SwaggerApplication``
 3. Provide your handler methods with OpenApi docstring, eg.
 
 ::
