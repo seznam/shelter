@@ -545,6 +545,7 @@ Usage:
         """
         self.write("Current value: %s" % self.context.value)
 
+4. After startup the SwaggerUI should be available on ``/swagger/spec.html`` endpoint.
 
 License
 -------
